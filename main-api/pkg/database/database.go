@@ -26,19 +26,15 @@ func Setup() {
 		log.Fatalln(err)
 	}
 
-	log.Println("Before connecting to database")
 	sqlXDb, err := sqlx.Connect("mysql", conStr)
 	if err != nil {
 		log.Fatalln("Database connection error: ", err)
 	}
 
 	// Ping database to check if connection is alive
-	log.Println("Before pinging")
 	if err := sqlXDb.Ping(); err != nil {
 		log.Fatalln("Database is not alive: ", err)
 	}
-
-	log.Println("Database connection established")
 
 	// Auto migrate project models
 	Db = sqlXDb

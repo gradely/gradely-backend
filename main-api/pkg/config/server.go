@@ -7,7 +7,6 @@ type DatabaseConfiguration struct {
 	DatabasePassword string `mapstructure:"DATABASE_PASSWORD"`
 	DatabaseHost     string `mapstructure:"DATABASE_HOST"`
 	DatabasePort     string `mapstructure:"DATABASE_PORT"`
-	LogMode          bool   `mapstructure:"LOG_MODE"`
 }
 
 type RedisConfiguration struct {

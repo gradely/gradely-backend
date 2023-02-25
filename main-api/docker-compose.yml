@@ -5,14 +5,13 @@ services:
     image: mysql:8.0
     command: mysqld --default-authentication-plugin=mysql_native_password
     env_file:
-      - config.yml
+      - .env
     environment:
-      MYSQL_USER: ${database.DATABASE_USERNAME}
-      command: echo ${database.DATABASE_USERNAME}
+      MYSQL_USER: ${DATABASE_USERNAME}
+      command: echo ${DATABASE_USERNAME}
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
       MYSQL_DATABASE: ${DATABASE_NAME}
-#      show DATABASE_USERNAME environment variables in the terminal
     ports:
       - "3306:3306"
     volumes:
@@ -37,18 +36,18 @@ services:
       dockerfile: docker/build/Dockerfile
       context: .
     env_file:
-      - config.yml
+      - .env
 
     environment:
-      DATABASE_HOST: ${database.DATABASE_HOST}
-      DATABASE_NAME: ${database.DATABASE_NAME}
-      DATABASE_USERNAME: ${database.DATABASE_USERNAME}
-      DATABASE_PASSWORD: ${database.DATABASE_PASSWORD}
-      DATABASE_PORT: ${database.DATABASE_PORT}
-      APP_ENV: ${database.APP_ENV}
-      HTTP_PORT: ${database.HTTP_PORT}
-      REDIS_HOST: "redis"
-      REDIS_PORT: "6379"
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_PORT: ${DATABASE_PORT}
+      APP_ENV: ${APP_ENV}
+      HTTP_PORT: ${HTTP_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
     links:
       - database
       - redis
