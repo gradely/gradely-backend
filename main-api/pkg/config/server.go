@@ -1,51 +1,39 @@
 package config
 
 type DatabaseConfiguration struct {
-	Driver         string
-	Dbname         string
-	CampaignDbname string
-	GameDbname     string
-	AppDbname      string
-	Username       string
-	Password       string
-	Host           string
-	Port           string
-	LogMode        bool
+	Driver           string `mapstructure:"DRIVER"`
+	DatabaseName     string `mapstructure:"DATABASE_NAME"`
+	DatabaseUsername string `mapstructure:"DATABASE_USERNAME"`
+	DatabasePassword string `mapstructure:"DATABASE_PASSWORD"`
+	DatabaseHost     string `mapstructure:"DATABASE_HOST"`
+	DatabasePort     string `mapstructure:"DATABASE_PORT"`
+	LogMode          bool   `mapstructure:"LOG_MODE"`
 }
 
 type RedisConfiguration struct {
-	Redishost string
-	Redisport string
+	RedisHost string `mapstructure:"REDIS_HOST"`
+	RedisPort string `mapstructure:"REDIS_PORT"`
 }
 
 type ParamsConfiguration struct {
-	MasterPassword       string
-	LiveClassSecretToken string
-
-	//BBB
-	LiveClassClient  string
-	BBBSecret        string
-	BBBServerBaseUrl string
+	MasterPassword string `mapstructure:"MASTER_PASSWORD"`
 
 	//Logging
-	Sentrydsn      string
-	Environment    string
-	Debug          bool
-	Release        string
-	StackTract     bool
-	AppBaseUrl     string
-	PaystackApiKey string
-	SummerSchoolID int
-	V2ApiBaseUrl   string
+	Sentrydsn   string `mapstructure:"SENTRY_DSN"`
+	Environment string `mapstructure:"ENVIRONMENT"`
+	Debug       bool   `mapstructure:"DEBUG"`
+	Release     string `mapstructure:"RELEASE"`
+	StackTract  bool   `mapstructure:"STACK_TRACE"`
+	AppBaseUrl  string `mapstructure:"APP_BASE_URL"`
 }
 
 type ParamsNotification struct {
-	BaseUrl string
+	BaseUrl string `mapstructure:"BASE_URL"`
 }
 
 type EmailConfiguration struct {
-	EmailUser     string
-	EmailPassword string
-	EmailHost     string
-	EmailPort     string
+	EmailUser     string `mapstructure:"EMAIL_USER"`
+	EmailPassword string `mapstructure:"EMAIL_PASSWORD"`
+	EmailHost     string `mapstructure:"EMAIL_HOST"`
+	EmailPort     string `mapstructure:"EMAIL_PORT"`
 }

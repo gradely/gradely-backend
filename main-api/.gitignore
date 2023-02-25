@@ -27,5 +27,6 @@
 .DS_Store?
 .vscode/
 .idea
-
+.env
 config.yml
+main

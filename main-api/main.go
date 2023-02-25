@@ -26,7 +26,7 @@ func main() {
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-
+			log.Fatalf("Failed to close database connection: %v", err)
 		}
 	}(db) // Close database connection when main function exits
 

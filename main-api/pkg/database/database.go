@@ -15,28 +15,30 @@ var (
 func Setup() {
 	getConfig := config.GetConfig()
 
-	database := getConfig.Database.Dbname
-	username := getConfig.Database.Username
-	password := getConfig.Database.Password
-	host := getConfig.Database.Host
-	port := getConfig.Database.Port
+	database := getConfig.Database.DatabaseName
+	username := getConfig.Database.DatabaseUsername
+	password := getConfig.Database.DatabasePassword
+	host := getConfig.Database.DatabaseHost
+	port := getConfig.Database.DatabasePort
 
 	conStr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4", username, password, host, port, database)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	log.Println("Before connecting to database")
 	sqlXDb, err := sqlx.Connect("mysql", conStr)
-
 	if err != nil {
-		log.Fatalln("SQLX db error: ", err)
+		log.Fatalln("Database connection error: ", err)
 	}
 
-	if err != nil {
-		log.Fatalln("SQLX db error: ", err)
+	// Ping database to check if connection is alive
+	log.Println("Before pinging")
+	if err := sqlXDb.Ping(); err != nil {
+		log.Fatalln("Database is not alive: ", err)
 	}
-	// Change this to true if you want to see SQL queries
-	//db.LogMode(getConfig.Database.LogMode)
+
+	log.Println("Database connection established")
 
 	// Auto migrate project models
 	Db = sqlXDb

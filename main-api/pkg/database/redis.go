@@ -16,13 +16,13 @@ var (
 func SetupRedis() {
 	getConfig := config.GetConfig()
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%v:%v", getConfig.Redis.Redishost, getConfig.Redis.Redisport),
+		Addr:     fmt.Sprintf("%v:%v", getConfig.Redis.RedisHost, getConfig.Redis.RedisPort),
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
 
 	if err := rdb.Ping(Ctx).Err(); err != nil {
-		fmt.Printf("%v:%v", getConfig.Redis.Redishost, getConfig.Redis.Redisport)
+		fmt.Printf("The redis conection: %v:%v", getConfig.Redis.RedisHost, getConfig.Redis.RedisPort)
 		log.Fatalln("Redis db error: ", err)
 	}
 	pong, _ := rdb.Ping(Ctx).Result()
