@@ -14,8 +14,6 @@ services:
       MYSQL_DATABASE: ${DATABASE_NAME}
     ports:
       - "3306:3306"
-    volumes:
-        - dbdata:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD"]
       interval: 10s
@@ -54,6 +52,3 @@ services:
 
     ports:
       - "8080:8080"
-
-volumes:
-  dbdata:
