@@ -65,18 +65,6 @@ func SetupMigrations(db *sql.DB, migrationsPath string) {
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		panic(err)
 	}
-
-	// Print the current migration version
-	version, dirty, err := m.Version()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Current migration version: %v, dirty: %v\n", version, dirty)
-
-	// Close the database connection
-	if err := db.Close(); err != nil {
-		panic(err)
-	}
 }
 
 func GetSqlxDb() *sqlx.DB {
