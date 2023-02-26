@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `user`
     `lastname`             varchar(50) CHARACTER SET utf8 COLLATE utf8_unicode_ci           DEFAULT NULL,
     `phone`                varchar(25) CHARACTER SET utf8 COLLATE utf8_unicode_ci           DEFAULT NULL,
     `image`                varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci          DEFAULT NULL,
-    `type`                 enum('student','teacher','parent','school','tutor') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+    `type`                 enum('student','teacher','parent','school','tutor') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     `auth_key`             varchar(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci  NOT NULL,
     `password_hash`        varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `password_reset_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci          DEFAULT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `user`
     `class`                int                                                              DEFAULT NULL COMMENT 'This is student temporary class while the child is yet to be connected to school',
     `status`               smallint                                                NOT NULL DEFAULT '10' COMMENT '10 for active, 9 for inactive and 0 for deleted',
     `subscription_expiry`  datetime                                                         DEFAULT NULL,
-    `subscription_plan`    enum('free','trial','basic','premium') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+    `subscription_plan`    enum('free','trial','basic','premium') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `created_at`           int                                                     NOT NULL,
     `updated_at`           int                                                     NOT NULL,
     `verification_token`   varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci          DEFAULT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `subject_topics`
     `school_id`    int                                                              DEFAULT NULL,
     `slug`         varchar(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `topic`        varchar(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-    `description`  mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `description`  mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     `week_number`  smallint                                                NOT NULL COMMENT 'It contains numbers. 1 stands for week one, 5 stands for week 5',
     `term`         enum('first','second','third') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `exam_type_id` int                                                     NOT NULL,
@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS `tutor_session`
     `availability`     datetime                                                        DEFAULT NULL,
     `is_school`        int                                                    NOT NULL DEFAULT '0',
     `preferred_client` enum('zoom','daily','jitsi','bbb') COLLATE utf8_unicode_ci DEFAULT 'bbb',
-    `meeting_token`    text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT 'For daily.co, this is used to set the host',
+    `meeting_token`    text CHARACTER SET utf8mb4 COLLATE utf8_unicode_ci COMMENT 'For daily.co, this is used to set the host',
     `meeting_room`     varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci         DEFAULT NULL COMMENT 'this is use to determine the room for this class',
     `meta`             text CHARACTER SET utf8 COLLATE utf8_unicode_ci COMMENT 'Any additional data',
     `participant_type` enum('single','multiple') COLLATE utf8_unicode_ci DEFAULT 'multiple' COMMENT 'If type is single, it means it is for one student, if it is multiple, it means it is for multiple students and their id are stored in tutor_session_participant',
@@ -305,7 +305,7 @@ CREATE TABLE IF NOT EXISTS `class_attendance`
     KEY              `user_id` (`user_id`),
     CONSTRAINT `class_attendance_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `tutor_session` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `class_attendance_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `class_subject_unenrolled`
 (
@@ -341,7 +341,7 @@ CREATE TABLE IF NOT EXISTS `schools`
     `contact_name`            varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci          DEFAULT NULL,
     `contact_role`            varchar(50) CHARACTER SET utf8 COLLATE utf8_unicode_ci           DEFAULT NULL,
     `contact_email`           varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci          DEFAULT NULL,
-    `contact_image`           varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci    DEFAULT NULL,
+    `contact_image`           varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci    DEFAULT NULL,
     `phone`                   varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci           DEFAULT NULL,
     `phone2`                  varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci           DEFAULT NULL,
     `school_email`            varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci          DEFAULT NULL,
@@ -423,7 +423,7 @@ CREATE TABLE IF NOT EXISTS `comprehension`
     `created_at` timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `content_management_backup`
 (
@@ -773,7 +773,7 @@ CREATE TABLE IF NOT EXISTS `last_accessed_url`
     `url`        varchar(255) NOT NULL,
     `created_at` timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `learning_area`
 (
@@ -856,7 +856,7 @@ CREATE TABLE IF NOT EXISTS `messages`
     `reference_id`   int         NOT NULL COMMENT '"student_id" or "class_id"',
     `created_at`     timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `migration`
 (
@@ -882,7 +882,7 @@ CREATE TABLE IF NOT EXISTS `offers`
     `download_count` int          NOT NULL DEFAULT '0',
     `created_at`     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `options`
 (
@@ -994,7 +994,7 @@ CREATE TABLE IF NOT EXISTS `practice_topics`
     KEY           `topic_id` (`topic_id`),
     CONSTRAINT `practice_topics_ibfk_1` FOREIGN KEY (`practice_id`) REFERENCES `homeworks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `practice_topics_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `subject_topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `proctor_feedback`
 (
@@ -1073,16 +1073,16 @@ CREATE TABLE IF NOT EXISTS `questions`
     `option_d`          text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
     `option_e`          text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
     `answer`            mediumtext COLLATE utf8_unicode_ci COMMENT 'Answer should either be A, B, C, D, or E FOr multiple options and 1=true/0=false for boolean true/false questions',
-    `type`              enum('multiple','bool','essay','short') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'multiple' COMMENT 'Multiple is for a-d, bool is 1 and 0, essay receives input text or attachment, short is for SHORT ANSWER',
+    `type`              enum('multiple','bool','essay','short') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'multiple' COMMENT 'Multiple is for a-d, bool is 1 and 0, essay receives input text or attachment, short is for SHORT ANSWER',
     `topic_id`          int       NOT NULL,
     `learning_area_id`  int                                                    DEFAULT NULL COMMENT 'This contains the sub-categories of topics.',
     `exam_type_id`      int       NOT NULL,
-    `image`             text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+    `image`             text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     `difficulty`        enum('easy','medium','hard') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `duration`          smallint  NOT NULL COMMENT 'duration is in seconds',
     `explanation`       text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
     `clue`              text CHARACTER SET utf8 COLLATE utf8_unicode_ci COMMENT 'This give clue to the question',
-    `category`          enum('homework','catchup','exam') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'homework',
+    `category`          enum('homework','catchup','exam') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'homework',
     `comprehension_id`  int                                                    DEFAULT NULL,
     `video_explanation` text COLLATE utf8_unicode_ci COMMENT 'Url to the video that explain this question',
     `file_upload`       int                                                    DEFAULT NULL COMMENT 'If essay answer can be uploaded rather than written',
@@ -1421,7 +1421,7 @@ CREATE TABLE IF NOT EXISTS `school_subject`
     KEY                   `subject_id` (`subject_id`),
     CONSTRAINT `school_subject_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `school_subject_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `school_teachers`
 (
@@ -1649,13 +1649,13 @@ CREATE TABLE IF NOT EXISTS `subscriptions`
     `reference_id`       int                                                           DEFAULT NULL COMMENT 'e.g tutor_id or any id to reference this payment',
     `price`              decimal(10, 2) NOT NULL COMMENT 'Price to be paid',
     `quantity`           int            NOT NULL COMMENT 'number of children you pay for',
-    `duration`           enum('day','week','month','monthly','quarterly','yearly','payg') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'month, year or pays(e.g tutor session)',
+    `duration`           enum('day','week','month','monthly','quarterly','yearly','payg') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'month, year or pays(e.g tutor session)',
     `duration_count`     int            NOT NULL COMMENT 'This could be number of month/year you paying for subscription, it also means number of session you paying for if you using payg(like tutors session)',
     `total`              decimal(10, 2) NOT NULL COMMENT 'This is total amount to be paid after adding all children and all applying coupon',
-    `payment`            enum('unpaid','paid') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'unpaid' COMMENT 'Paid or unpaid',
+    `payment`            enum('unpaid','paid') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unpaid' COMMENT 'Paid or unpaid',
     `amount_paid`        decimal(10, 2)                                                DEFAULT NULL COMMENT 'Actual paid amount after all calculation',
-    `transaction_id`     varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT 'Unique id for this payment',
-    `plan_code`          varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Incase you are using gateway automatic subscription',
+    `transaction_id`     varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  DEFAULT NULL COMMENT 'Unique id for this payment',
+    `plan_code`          varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Incase you are using gateway automatic subscription',
     `plan`               enum('basic','premium','payg','subscription') CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Basic & Premium is access to regular paid service. \r\npayg is a one time payment for a service, e.g you paid for tutor want. \r\nsubscription is continuous interval payment for a service, e.g every week, month, etc tutor service.',
     `type`               enum('subscription','tutor') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'subscription' COMMENT 'Subscription is for regular monthly subscription while tutor is a PAYG service for tutor session.',
     `meta`               text CHARACTER SET utf8 COLLATE utf8_unicode_ci COMMENT 'You can put any additional data here',
@@ -1996,7 +1996,7 @@ CREATE TABLE IF NOT EXISTS `video_content`
     `updated_at`       timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     `etag`             varchar(100)          DEFAULT NULL COMMENT 'Identify the video on s3',
     PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `video_assign`
 (
@@ -2014,7 +2014,7 @@ CREATE TABLE IF NOT EXISTS `video_assign`
     KEY          `content_id` (`content_id`),
     CONSTRAINT `video_assign_ibfk_1` FOREIGN KEY (`topic_id`) REFERENCES `subject_topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `video_assign_ibfk_2` FOREIGN KEY (`content_id`) REFERENCES `video_content` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `video_category`
 (
@@ -2029,7 +2029,7 @@ CREATE TABLE IF NOT EXISTS `video_category`
     `updated_by`  int                   DEFAULT NULL,
     `vendor`      enum('gradely','wizitup') NOT NULL DEFAULT 'gradely',
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `video_instructor`
 (
@@ -2046,7 +2046,7 @@ CREATE TABLE IF NOT EXISTS `video_instructor`
     `created_at`         timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`         timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `video_subject`
 (
@@ -2068,7 +2068,7 @@ CREATE TABLE IF NOT EXISTS `video_subject`
     `created_at`         timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`         timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `video_topic`
 (
@@ -2088,4 +2088,4 @@ CREATE TABLE IF NOT EXISTS `video_topic`
     `created_at`         timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`         timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
