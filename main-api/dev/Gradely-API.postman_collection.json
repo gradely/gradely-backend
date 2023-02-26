@@ -1,0 +1,51 @@
+{
+	"info": {
+		"_postman_id": "eb2de146-d0d0-4dfe-8fde-b7ba50a92682",
+		"name": "Gradely-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2277904"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n     \"email\":\"{{graely-user-email}}\",\n     \"password\":\"{{gradely-user-password}}\"\n }\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gradely-host}}/v1/auth/login",
+							"host": [
+								"{{gradely-host}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "email field accepts\n- email\n- Code\n- Phone number"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
