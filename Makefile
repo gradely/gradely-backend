@@ -1,5 +1,5 @@
 start:
-	@echo "Building the LMS..."
+	@echo "Building and starting the LMS..."
 	docker-compose -f main-api/docker-compose.yml up --build
 
 restart:
