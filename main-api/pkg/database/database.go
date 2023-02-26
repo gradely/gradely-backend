@@ -41,14 +41,14 @@ func Setup() {
 	}
 
 	// Setup migrations for the database
-	SetupMigrations(sqlXDb.DB)
+	SetupMigrations(sqlXDb.DB, "db/migration")
 
 	// Auto migrate project models
 	Db = sqlXDb
 }
 
 // SetupMigrations setup migrations for the database
-func SetupMigrations(db *sql.DB) {
+func SetupMigrations(db *sql.DB, migrationsPath string) {
 	// Create a new instance of the MySQL driver
 	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	if err != nil {
@@ -56,25 +56,13 @@ func SetupMigrations(db *sql.DB) {
 	}
 
 	// Create a new migration instance
-	m, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://db/migration"), "mysql", driver)
+	m, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://%s", migrationsPath), "mysql", driver)
 	if err != nil {
 		panic(err)
 	}
 
 	// Run the migrations
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		panic(err)
-	}
-
-	// Print the current migration version
-	version, dirty, err := m.Version()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Current migration version: %v, dirty: %v\n", version, dirty)
-
-	// Close the database connection
-	if err := db.Close(); err != nil {
 		panic(err)
 	}
 }
