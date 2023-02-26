@@ -10,3 +10,7 @@ restart:
 stop:
 	@echo "Stopping the LMS..."
 	docker-compose -f main-api/docker-compose.yml down
+
+test:
+	@echo "Running tests..."
+	cd main-api && go test ./...
