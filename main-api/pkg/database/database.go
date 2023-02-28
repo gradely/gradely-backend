@@ -8,7 +8,9 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gradely/gradely-backend/pkg/config"
 	"github.com/jmoiron/sqlx"
+	"github.com/ory/dockertest/v3"
 	"log"
+	"time"
 )
 
 var (
@@ -65,6 +67,41 @@ func SetupMigrations(db *sql.DB, migrationsPath string) {
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		panic(err)
 	}
+}
+
+func MockDatabase() {
+	pool, err := dockertest.NewPool("")
+	if err != nil {
+		log.Fatalf("failed to create Docker pool: %v", err)
+	}
+	pool.MaxWait = time.Minute * 2
+
+	// uses pool to try to connect to Docker
+	err = pool.Client.Ping()
+	if err != nil {
+		log.Fatalf("Could not connect to Docker: %s", err)
+	}
+
+	// Set up a MySQL container
+	resource, err := pool.Run("mysql", "8.0", []string{"MYSQL_ROOT_PASSWORD=secret"})
+	if err != nil {
+		log.Fatalf("failed to start MySQL container: %v", err)
+	}
+
+	var db *sqlx.DB
+
+	// Wait for the MySQL container to start up
+	if err := pool.Retry(func() error {
+		db, err = sqlx.Open("mysql", fmt.Sprintf("root:secret@tcp(localhost:%s)/mysql?parseTime=true&charset=utf8mb4&multiStatements=true", resource.GetPort("3306/tcp")))
+		if err != nil {
+			return err
+		}
+		return db.Ping()
+	}); err != nil {
+		log.Fatalf("failed to connect to MySQL container: %v", err)
+	}
+	Db = db
+
 }
 
 func GetSqlxDb() *sqlx.DB {

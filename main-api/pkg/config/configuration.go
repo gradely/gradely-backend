@@ -23,7 +23,7 @@ type Configuration struct {
 var Params ParamsConfiguration
 
 // Setup reads the configuration data from the config file
-func Setup() {
+func Setup(configFile string) {
 
 	var server *ServerConfiguration
 	var database *DatabaseConfiguration
@@ -31,7 +31,7 @@ func Setup() {
 	var params *ParamsConfiguration
 
 	// get environment variable from .env file
-	viper.SetConfigFile(".env")
+	viper.SetConfigFile(configFile)
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
