@@ -170,3 +170,48 @@ func (ctrl *Controller) RefreshToken(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, response.BuildErrorResponse(http.StatusUnauthorized, "error", "refresh expired", nil, nil))
 	}
 }
+
+func (ctrl *Controller) CheckToken(c *gin.Context) {
+	tokenStr := auth.ExtractToken(c)
+	userAgent := auth.GetUserAgent(c)
+	if tokenStr == "" {
+		c.JSON(http.StatusUnauthorized, response.UnauthorisedResponse(http.StatusUnauthorized, fmt.Sprint(http.StatusUnauthorized), "Unauthorized", noToken))
+		return
+	}
+
+	token, err := auth.TokenValid(tokenStr)
+	if err != nil {
+		c.JSON(http.StatusOK, false)
+		return
+	}
+	claims, ok := token.Claims.(jwt.MapClaims) //the token claims should conform to MapClaims
+	if ok && token.Valid {
+		accessUuid, ok := claims["access_uuid"].(string) //convert the interface to string
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", err))
+			return
+		}
+
+		authoriseStatus, ok := claims["authorised"].(bool) //check if token is authorised for middleware
+		if !ok && !authoriseStatus {
+			c.AbortWithStatusJSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", false))
+			return
+		}
+
+		universalStatus, ok := claims["universal_access"].(bool) //check if token is authorised for middleware
+		if ok && universalStatus {
+			c.AbortWithStatusJSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", true))
+			return
+		}
+
+		_, err := auth.FetchAuth(userAgent + "-" + claims["user_id"].(string) + "-" + accessUuid)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", false))
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", true))
+		return
+	}
+	c.JSON(http.StatusOK, false)
+}
