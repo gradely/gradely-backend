@@ -17,6 +17,7 @@ import (
 	ua "github.com/mileusna/useragent"
 	"github.com/twinj/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	mathRand "math/rand"
 	"strconv"
 	"strings"
@@ -59,7 +60,7 @@ func ValidateToken(db *sqlx.DB, bearerToken string) (*model.User, error) {
 // TokenVerification verifies a user's token and returns the user
 func TokenVerification(db *sqlx.DB, tokenString string) (*model.User, error) {
 	user := &model.User{}
-	if err := db.Get(user, "SELECT id, username, code, firstname, lastname, phone, image, type, status, subscription_expiry, subscription_plan, created_at, updated_at, verification_token, token, is_boarded, mode, verification_status FROM user WHERE token = ?", tokenString); err != nil {
+	if err := db.Get(user, "SELECT id, username, code, firstname, lastname, phone, image, type, status, subscription_expiry, subscription_plan, created_at, updated_at, verification_token, token, is_boarded, mode, verification_status FROM users WHERE token = ?", tokenString); err != nil {
 		return user, err
 	}
 	return user, nil
@@ -68,7 +69,7 @@ func TokenVerification(db *sqlx.DB, tokenString string) (*model.User, error) {
 // GetUserByID finds a user by their ID and returns the user
 func GetUserByID(db *sqlx.DB, id string) (*model.User, error) {
 	user := &model.User{}
-	if err := db.Get(user, "SELECT id, username, code, firstname, lastname, phone, image, type, status, subscription_expiry, subscription_plan, created_at, updated_at, verification_token, token, is_boarded, mode, verification_status FROM user WHERE id = ?", id); err != nil {
+	if err := db.Get(user, "SELECT id, username, code, firstname, lastname, phone, image, type, status, subscription_expiry, subscription_plan, created_at, updated_at, verification_token, token, is_boarded, mode, verification_status FROM users WHERE id = ?", id); err != nil {
 		return user, err
 	}
 	return user, nil
@@ -80,7 +81,7 @@ func GetUserByEmailOrPhone(db *sqlx.DB, emailOrPhone string) (*model.User, error
 	query := `
 		SELECT id, code, email, firstname, lastname, phone, IF(image LIKE '%http%', image, CONCAT('https://live.gradely.ng/images/users/', image)) image,
 		class, is_boarded, verification_status, password_hash, type 
-		FROM user WHERE status != 0 AND (email=? OR phone=? OR code=?)`
+		FROM users WHERE status != 0 AND (email=? OR phone=? OR code=?)`
 
 	err := db.Get(user, query, emailOrPhone, emailOrPhone, emailOrPhone)
 	if err != nil {
@@ -95,7 +96,7 @@ func FindUserByID(id int) (model.User, error) {
 	user := model.User{}
 	base := database.GetSqlxDb()
 
-	err := base.Get(&user, `SELECT id, code, email, firstname, lastname, phone, image, class, is_boarded, verification_status, type FROM user WHERE status != 0 AND id=?`, id)
+	err := base.Get(&user, `SELECT id, code, email, firstname, lastname, phone, image, class, is_boarded, verification_status, type FROM users WHERE status != 0 AND id=?`, id)
 	if err != nil {
 		return user, fmt.Errorf("error while finding user: %w", err)
 	}
@@ -107,7 +108,7 @@ func FindUserAuthByID(id int, mySchool model.School, myIdentity dto.UserIdentity
 	user := dto.UserAuthResponse{}
 	base := database.GetSqlxDb()
 
-	err := base.Get(&user, `SELECT id, code, email, firstname, lastname, phone, image, class, is_boarded, verification_status, type FROM user WHERE status != 0 AND id=?`, id)
+	err := base.Get(&user, `SELECT id, code, email, firstname, lastname, phone, image, class, is_boarded, verification_status, type FROM users WHERE status != 0 AND id=?`, id)
 	if err != nil {
 		return user, fmt.Errorf("error while finding user: %w", err)
 	}
@@ -124,7 +125,7 @@ func GetGlobalClassWithStudentID(db *sqlx.DB, childID int) (int, error) {
 
 	err := db.Get(&studentClassID, `SELECT cls.global_class_id FROM student_school ss left join classes cls on cls.id=ss.class_id  WHERE ss.student_id=?`, childID)
 	if err != nil || studentClassID == 0 {
-		err := db.Get(&studentClassID, `SELECT IFNULL(class, 0) FROM user WHERE id=?`, childID)
+		err := db.Get(&studentClassID, `SELECT IFNULL(class, 0) FROM users WHERE id=?`, childID)
 		if err != nil {
 			return studentClassID, fmt.Errorf("error while getting global class: %w", err)
 		}
@@ -138,7 +139,7 @@ func GetUserProfile(id int) (dto.UserProfileResponse, error) {
 	user := dto.UserProfileResponse{}
 	base := database.GetSqlxDb()
 
-	err := base.Get(&user, `SELECT user.id, code, email, firstname, lastname, phone, image, class, user.is_boarded, verification_status, type, p.id, p.user_id, p.dob, p.mob, p.yob, p.gender, p.address, p.city, p.state, p.country, p.about FROM user 
+	err := base.Get(&user, `SELECT user.id, code, email, firstname, lastname, phone, image, class, user.is_boarded, verification_status, type, p.id, p.user_id, p.dob, p.mob, p.yob, p.gender, p.address, p.city, p.state, p.country, p.about FROM users 
 		LEFT JOIN user_profile p ON p.user_id = user.id
 		WHERE status != 0 AND user.id=?`, id)
 	if err != nil {
@@ -484,9 +485,13 @@ func ExtractTokenMetadata(tokenstr string) (*dto.AccessDetails, error) {
 // FetchAuth fetches the user ID associated with the provided Redis key from Redis.
 func FetchAuth(key string) (string, error) {
 	// Get Redis client from database package
+	log.Println("I ant auto 8.5")
 	rdb := database.GetRedisDb()
+	log.Println("I ant auto 5.6", rdb)
+	log.Println("I ant auto 5.7", database.Ctx, key)
 	// Get value associated with key in Redis
 	userid, err := rdb.Get(database.Ctx, key).Result()
+	log.Println("I ant auto 7")
 	if err != nil {
 		return "", err
 	}
