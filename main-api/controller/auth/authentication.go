@@ -8,6 +8,7 @@ import (
 	"github.com/gradely/gradely-backend/model"
 	"github.com/gradely/gradely-backend/model/dto"
 	response "github.com/gradely/gradely-backend/pkg/common"
+	"github.com/gradely/gradely-backend/pkg/middleware"
 	"github.com/gradely/gradely-backend/service/auth"
 	"github.com/gradely/gradely-backend/utility"
 	"io"
@@ -214,4 +215,22 @@ func (ctrl *Controller) CheckToken(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, false)
+}
+
+func (ctrl *Controller) TokenProfile(c *gin.Context) {
+	var mySchool model.School
+	var schAdmin model.SchoolAdmin
+	if middleware.MyIdentity.Type == "school" {
+		mySchool = utility.MySchoolObject()
+		if middleware.MyIdentity.ID != mySchool.UserID {
+			schAdmin = utility.GetSchoolAdmin(ctrl.Db, middleware.MyIdentity.ID)
+		}
+	}
+	user, err := auth.FindAuthByID(middleware.MyIdentity.ID, mySchool, *middleware.MyIdentity, schAdmin)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNonAuthoritativeInfo, response.BuildErrorResponse(http.StatusNonAuthoritativeInfo, "error", "You provided invalid login details", "User does not exist", nil))
+		return
+	}
+
+	c.JSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", user))
 }

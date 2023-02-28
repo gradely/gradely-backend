@@ -17,7 +17,6 @@ import (
 	ua "github.com/mileusna/useragent"
 	"github.com/twinj/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	mathRand "math/rand"
 	"strconv"
 	"strings"
@@ -242,16 +241,16 @@ func GetUserObjectAuth(base *sqlx.DB, user dto.UserAuthResponse, mySchool model.
 // CreateToken function creates and returns access and refresh tokens
 func CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenDetailsDTO, error) {
 	// Get the server configuration
-	config := config.GetConfig()
+	getConfig := config.GetConfig()
 
 	// Create an empty TokenDetailsDTO object
 	td := &dto.TokenDetailsDTO{}
 
 	// Set access token expire time
-	td.AtExpiresTime = time.Now().Add(time.Hour * time.Duration(config.Server.AccessTokenExpireDuration))
+	td.AtExpiresTime = time.Now().Add(time.Hour * time.Duration(getConfig.Server.AccessTokenExpireDuration))
 
 	// Set refresh token expire time
-	td.RtExpiresTime = time.Now().Add(time.Hour * time.Duration(config.Server.RefreshTokenExpireDuration))
+	td.RtExpiresTime = time.Now().Add(time.Hour * time.Duration(getConfig.Server.RefreshTokenExpireDuration))
 
 	// Generate a new UUID for access and refresh tokens
 	td.AccessUuid = uuid.NewV4().String()
@@ -272,7 +271,7 @@ func CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenD
 
 	// Sign the access token with the server secret
 	var err error
-	td.AccessToken, err = token.SignedString([]byte(config.Server.Secret))
+	td.AccessToken, err = token.SignedString([]byte(getConfig.Server.Secret))
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +289,7 @@ func CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenD
 	rtoken := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 
 	// Sign the refresh token with the server secret
-	td.RefreshToken, err = rtoken.SignedString([]byte(config.Server.Secret))
+	td.RefreshToken, err = rtoken.SignedString([]byte(getConfig.Server.Secret))
 	if err != nil {
 		return nil, err
 	}
@@ -485,13 +484,9 @@ func ExtractTokenMetadata(tokenstr string) (*dto.AccessDetails, error) {
 // FetchAuth fetches the user ID associated with the provided Redis key from Redis.
 func FetchAuth(key string) (string, error) {
 	// Get Redis client from database package
-	log.Println("I ant auto 8.5")
 	rdb := database.GetRedisDb()
-	log.Println("I ant auto 5.6", rdb)
-	log.Println("I ant auto 5.7", database.Ctx, key)
 	// Get value associated with key in Redis
 	userid, err := rdb.Get(database.Ctx, key).Result()
-	log.Println("I ant auto 7")
 	if err != nil {
 		return "", err
 	}
@@ -535,11 +530,11 @@ func UpdateV2Auth(token string, id string, status bool) error {
 	var err error
 	if status {
 		// If the status is true, update the token and token_expires fields
-		query = `UPDATE user SET token = ?, token_expires = ? WHERE id = ?`
+		query = `UPDATE users SET token = ?, token_expires = ? WHERE id = ?`
 		_, err = base.Exec(query, token, time.Now().AddDate(0, 4, 0), id)
 	} else {
 		// If the status is false, set the token and token_expires fields to NULL
-		query = `UPDATE user SET token = NULL, token_expires = NULL WHERE id = ?`
+		query = `UPDATE users SET token = NULL, token_expires = NULL WHERE id = ?`
 		_, err = base.Exec(query, id)
 	}
 	return err
@@ -570,4 +565,17 @@ func LogErrorSentry(err interface{}) {
 			})
 		}
 	}
+}
+
+// FindAuthByID FindByID method
+func FindAuthByID(id int, mySchool model.School, myIdentity dto.UserIdentity, schoolAdmin model.SchoolAdmin) (dto.UserAuthResponse, error) {
+	user := dto.UserAuthResponse{}
+	base := database.GetSqlxDb()
+
+	if err := base.Get(&user, `SELECT id, code, email, firstname, lastname, phone, image, class, is_boarded, verification_status, type FROM users WHERE status != 0 AND id=?`, id); err != nil {
+		return user, err
+	}
+	globalClassID, _ := GetGlobalClassWithStudentID(base, id)
+	user.Class = &globalClassID
+	return GetUserObjectAuth(base, user, mySchool, myIdentity, schoolAdmin)
 }

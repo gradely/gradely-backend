@@ -24,7 +24,7 @@ func AuthUrl(r *gin.Engine, db *sqlx.DB, validate *validator.Validate, ApiVersio
 	authProfileUrl := r.Group(fmt.Sprintf("/%v/auth", ApiVersion), middleware.Authorize(db))
 	{
 		authProfileUrl.POST("/check", api.CheckToken)
-		//authProfileUrl.GET("/profile", api.TokenProfile)
+		authProfileUrl.GET("/profile", api.TokenProfile)
 		//authProfileUrl.GET("/fetch-profile", api.FetchProfile)
 		//authProfileUrl.PUT("/profile-image", api.UpdateProfileImage)
 		//authProfileUrl.GET("/my-wallet", api.GetMyWallet)
