@@ -2,52 +2,19 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
-	"github.com/ory/dockertest/v3"
-	"log"
 	"testing"
-	"time"
 )
 
-var db *sql.DB
-
 func TestSetupMigrations(t *testing.T) {
-	pool, err := dockertest.NewPool("")
-	if err != nil {
-		log.Fatalf("failed to create Docker pool: %v", err)
-	}
-	pool.MaxWait = time.Minute * 2
+	MockDatabase()
+	db := GetSqlxDb()
 
-	// uses pool to try to connect to Docker
-	err = pool.Client.Ping()
-	if err != nil {
-		log.Fatalf("Could not connect to Docker: %s", err)
-	}
-
-	// Set up a MySQL container
-	resource, err := pool.Run("mysql", "8.0", []string{"MYSQL_ROOT_PASSWORD=secret"})
-	if err != nil {
-		log.Fatalf("failed to start MySQL container: %v", err)
-	}
-
-	// Wait for the MySQL container to start up
-	if err := pool.Retry(func() error {
-		db, err = sql.Open("mysql", fmt.Sprintf("root:secret@tcp(localhost:%s)/mysql?parseTime=true&charset=utf8mb4&multiStatements=true", resource.GetPort("3306/tcp")))
-		if err != nil {
-			return err
-		}
-		return db.Ping()
-	}); err != nil {
-		log.Fatalf("failed to connect to MySQL container: %v", err)
-	}
-
-	// set foreign_key_checks=0
 	_, err = db.Exec("SHOW ENGINE INNODB STATUS; SET FOREIGN_KEY_CHECKS=0")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	SetupMigrations(db, "../../db/migration")
+	SetupMigrations(db.DB, "../../db/migration")
 
 	rows, err := db.Query("SHOW TABLES")
 	if err != nil {

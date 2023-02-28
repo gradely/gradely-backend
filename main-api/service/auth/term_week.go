@@ -39,7 +39,7 @@ func GetSessionTermAndWeek(userID int, session string, db *sqlx.DB) (model.TermW
 	}
 
 	userType := ""
-	if err := db.Get(&userType, "SELECT type FROM user WHERE id="+strconv.Itoa(userID)); err != nil {
+	if err := db.Get(&userType, "SELECT type FROM users WHERE id="+strconv.Itoa(userID)); err != nil {
 		return model.TermWeek{}, err
 	}
 
@@ -171,7 +171,10 @@ func GetWeek(termStart int) int {
 func GetSchoolIDforTermWeek(userID int, userType string, db *sqlx.DB) (int, error) {
 	schoolID := 0
 
-	db.Get(&schoolID, "SELECT id FROM schools limit 1")
+	err := db.Get(&schoolID, "SELECT id FROM schools limit 1")
+	if err != nil {
+		fmt.Println(err)
+	}
 	if userType == "student" {
 		sQuery := "SELECT school_id FROM student_school where student_id=" + strconv.Itoa(userID) + " limit 1"
 		err := db.Get(&schoolID, sQuery)

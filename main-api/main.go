@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	config.Setup()
+	config.Setup(".env")
 	database.Setup()
 	database.SetupRedis()
 }
