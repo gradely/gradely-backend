@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `academy_calendar`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `user`
+CREATE TABLE IF NOT EXISTS `users`
 (
     `id`                   int                                                                                                   NOT NULL AUTO_INCREMENT,
     `username`             varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci                                                  DEFAULT NULL,

@@ -5431,3 +5431,60 @@ VALUES (1, 1, NULL, 7, NULL, 'whole-numbers-i', 'Whole Numbers I',
        (4739, 2, 20, 7, NULL, 'writing-181', 'Writing',
         '<p>i. Identify the types of letters</p>\r\n\r\n<p>ii. Explain types of letters</p>\r\n', 8, 'first', 1,
         't8an0jp8mygnfniedx0c6toa2nl5d9.png', 1, '2021-11-02 10:49:28');
+
+
+INSERT INTO `users` (`id`, `username`, `code`, `firstname`, `lastname`, `phone`, `image`, `type`, `auth_key`,
+                    `password_hash`, `password_reset_token`, `email`, `class`, `status`, `subscription_expiry`,
+                    `subscription_plan`, `created_at`, `updated_at`, `verification_token`, `oauth_provider`, `token`,
+                    `token_expires`, `oauth_uid`, `last_accessed`, `is_boarded`, `mode`, `verification_status`,
+                    `department`, `wallet`, `device_id`)
+VALUES (1, NULL, 'CFS/2023/0001', 'Teacher', 'User', '08123456789', NULL, 'teacher', 'eyxc3lkRkEeExsqF8lHGSjhSuYvKHTic',
+        '$2y$13$BVWazbApIQDI7sLQQxmRcutd2QjNc5r1P7b0mizwQm/jEwSWboVTC', NULL, 'testteacher@qa.team', NULL, 10, NULL,
+        NULL, 1561382242, 1653448256, 'inYBMPpembwkgr9agEyUBODBbqVxWSr4_1561382242', NULL,
+        'Z6-zTEZxFK2LLLVVSKMAJ_yLTlVmSg1vu_vEycTVmkug8uF46mNck',
+        '2022-08-25 04:10:56', NULL, '2022-05-25 03:10:56', 1, 'practice', 0, NULL, 0.00, NULL),
+       (2, NULL, 'DUF/2023/0002', 'Student', 'User', '09123456789', NULL, 'student', 'I2RO28OX6_hHXqyY172R5bBMUZtYMmB-',
+        '$2y$13$jz4IjufxkFrFjDnEkDtTJOtEVsSngYNeeI9O2xutn1X3mIm/vrnGG', NULL, 'teststudent@qa.team', 10, 9, NULL, NULL,
+        1563376207, 1629465455, 'r1SjohHiypVpGvxYdM_uJere1cAcYaVt_1563376207', NULL, '', NULL, NULL,
+        '2020-08-28 07:48:19', 1, 'practice', 0, NULL, 0.00, NULL),
+       (3, NULL, 'ADS/2023/0030', 'Parent', 'User', '07123456789', NULL, 'parent', 'aA9clDyuM_m0gIQ30OBNec4wO5J9b86i',
+        '$2y$13$kEZinRkr2KPK4Yg7c.FgP.oKxGELpBnOBI0Moi/.ont7eAxREnaoW', NULL, 'testparent@qa.team', NULL, 9, NULL,
+        NULL, 1564773426, 1564773426, 'NeIYZ_GdHeiasCQCjLgYrDfU2p2c7GTY_1564773426', NULL, 'jkdksjfiuhdsifusdfsdkfdsiufsdu', NULL, NULL,
+        '2020-04-18 05:57:17', 1, 'practice', 0, NULL, 0.00, NULL),
+       (4, NULL, 'XRA/2023/0063', 'School', 'User', '06123456789', NULL, 'school',
+        'plOYGUzUGAgQeAXkVAd3oLw3yxYqoW1G', '$2y$13$DpyQNVBcJ80HGK1zeqa4U.JT.hSboyvxtud6uh1vt0l6YUAhVC4aq', NULL,
+        'testschool@qa.team', NULL, 0, NULL, NULL, 1566822318,
+        1660156079, 'kV8cyGrXrCGFD3AWTnYLReREYTVl652p_1566822318', NULL, 'jkbhsdklufghksludhgkdshfijaoiuh', NULL, NULL,
+        NULL, 1, 'practice', 0, NULL, 0.00, NULL);
+
+INSERT INTO `user_profile` (`id`, `user_id`, `dob`, `mob`, `yob`, `gender`, `address`, `city`, `state`, `country`,
+                            `about`, `postal_code`, `is_boarded`, `password_updated_time`, `password_updated_location`,
+                            `password_updated_device`, `signup_source`, `set_goal`, `created_at`)
+VALUES (1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0,
+        '2022-07-13 12:38:46'),
+       (2, 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0,
+        '2022-07-15 11:20:07'),
+       (3, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0,
+        '2022-07-17 15:10:07'),
+       (4, 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0,
+        '2022-07-27 18:37:24');
+
+INSERT INTO `user_preference` (`id`, `user_id`, `weekly_progress_report`, `product_update`, `offer`, `sms`, `whatsapp`,
+                               `newsletter`, `reminder`, `updated`, `sound_effects`, `catchup_sound_effects`,
+                               `pause_all_notifications`, `download_over_wifi_only`, `video_quality`,
+                               `load_high_quality_images`, `video_autoplay`)
+VALUES (1, 1, 1, 1, 1, 1, 1, 1, 1, '2020-12-13 07:06:18', 1, 1, 0, 1, 'auto', 'wifi', 'wifi'),
+       (2, 2, 1, 1, 1, 1, 1, 1, 1, '2021-01-08 13:34:40', 1, 1, 0, 1, 'auto', 'wifi', 'wifi'),
+       (3, 3, 1, 1, 1, 1, 1, 1, 1, '2021-01-08 14:54:51', 1, 1, 0, 1, 'auto', 'wifi', 'wifi'),
+       (4, 4, 1, 1, 1, 1, 1, 1, 1, '2021-01-10 16:15:44', 1, 1, 0, 1, 'auto', 'wifi', 'wifi');
+
+
+INSERT INTO `schools` (`id`, `user_id`, `slug`, `name`, `abbr`, `logo`, `banner`, `wallpaper`, `tagline`, `about`,
+                       `address`, `city`, `state`, `country`, `postal_code`, `website`, `establish_date`,
+                       `contact_name`, `contact_role`, `contact_email`, `contact_image`, `phone`, `phone2`,
+                       `school_email`, `school_type`, `created_at`, `updated_at`, `naming_format`, `timezone`,
+                       `boarding_type`, `subscription_plan`, `subscription_expiry`, `basic_subscription`,
+                       `premium_subscription`, `teacher_auto_join_class`, `student_auto_join_class`, `is_tutor`)
+VALUES (1, 4, 'test-school', 'Tetst School', 'test', NULL, NULL, NULL, '', '', '', '', '', 'Nigeria', '', '',
+        '--', '', '', '', NULL, '802 455 9334', '', '', 'all', '2019-09-30 13:26:08', NULL, 'year', NULL, NULL,
+        NULL, NULL, 0, 0, 1, 1, NULL);
