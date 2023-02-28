@@ -48,37 +48,3 @@ func TestSetupMigrations(t *testing.T) {
 		t.Fatal("expected more than 1 table, got ", len(tables))
 	}
 }
-
-//
-//func TestSetupMigrationsInvalidInput(t *testing.T) {
-//	// Set up a test database
-//	//db, err := sql.Open("mysql", "testuser:testpass@tcp(localhost:3306)/testdb")
-//	if err != nil {
-//		t.Fatalf("failed to connect to test database: %v", err)
-//	}
-//	defer db.Close()
-//
-//	// Call the function with an invalid input
-//	SetupMigrations(nil)
-//
-//	// Check that the function panics
-//	// Here you can add some assertions to check that the panic message is as expected
-//}
-//
-//func TestSetupMigrationsAlreadyRun(t *testing.T) {
-//	// Set up a test database
-//	db, err := sql.Open("mysql", "testuser:testpass@tcp(localhost:3306)/testdb")
-//	if err != nil {
-//		t.Fatalf("failed to connect to test database: %v", err)
-//	}
-//	defer db.Close()
-//
-//	// Run the migrations
-//	SetupMigrations(db)
-//
-//	// Run the migrations again
-//	SetupMigrations(db)
-//
-//	// Check that the second call to the function didn't result in any changes
-//	// Here you can add some assertions to check that the migration version didn't change
-//}
