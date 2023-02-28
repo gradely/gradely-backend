@@ -7,18 +7,24 @@ import (
 	"github.com/gradely/gradely-backend/model/dto"
 	"github.com/gradely/gradely-backend/pkg/config"
 	"github.com/gradely/gradely-backend/pkg/database"
+	"github.com/jmoiron/sqlx"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 )
 
-func TestAuthorize(t *testing.T) {
+var getConfig *config.Configuration
+var db *sqlx.DB
+
+func init() {
 	config.Setup("../../.env")
+	getConfig = config.GetConfig()
+	db = database.GetSqlxDb()
 	database.MockDatabase()
-	db := database.GetSqlxDb()
-	getConfig := config.GetConfig()
 	database.SetupRedis()
+}
+func TestAuthorize(t *testing.T) {
 
 	// Create a fake JWT token for testing
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

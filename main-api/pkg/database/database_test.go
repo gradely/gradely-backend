@@ -2,13 +2,19 @@ package database
 
 import (
 	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"testing"
 )
 
-func TestSetupMigrations(t *testing.T) {
-	MockDatabase()
-	db := GetSqlxDb()
+var db *sqlx.DB
 
+func init() {
+	MockDatabase()
+	db = GetSqlxDb()
+
+}
+
+func TestSetupMigrations(t *testing.T) {
 	_, err = db.Exec("SHOW ENGINE INNODB STATUS; SET FOREIGN_KEY_CHECKS=0")
 	if err != nil {
 		t.Fatal(err)
