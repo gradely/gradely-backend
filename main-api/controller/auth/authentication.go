@@ -1,13 +1,19 @@
 package auth
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/gradely/gradely-backend/model"
 	"github.com/gradely/gradely-backend/model/dto"
 	response "github.com/gradely/gradely-backend/pkg/common"
 	"github.com/gradely/gradely-backend/service/auth"
 	"github.com/gradely/gradely-backend/utility"
+	"io"
+	"log"
 	"net/http"
+	"strconv"
 )
 
 const (
@@ -91,4 +97,76 @@ func (ctrl *Controller) Login(c *gin.Context) {
 	userDetails.RefreshToken = token.RefreshToken
 	c.JSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", user))
 	return
+}
+
+func (ctrl *Controller) RefreshToken(c *gin.Context) {
+
+	mapToken := map[string]string{}
+
+	decoder := json.NewDecoder(c.Request.Body)
+	if err := decoder.Decode(&mapToken); err != nil {
+		errs := []string{"REFRESH_TOKEN_ERROR"}
+		c.JSON(http.StatusUnprocessableEntity, errs)
+		return
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(c.Request.Body)
+	token, err := auth.TokenValid(mapToken["refresh_token"])
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, invalidToken)
+		return
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims) //the token claims should conform to MapClaims
+	if ok && token.Valid {
+		userAgent := auth.GetUserAgent(c)
+		refreshUuid, ok := claims["refresh_uuid"].(string) //convert the interface to string
+		if !ok {
+			log.Println(err)
+			c.JSON(http.StatusUnprocessableEntity, err)
+			return
+		}
+		userId, err := strconv.ParseUint(claims["user_id"].(string), 10, 64)
+		if err != nil {
+			c.JSON(http.StatusUnprocessableEntity, "Error occured")
+			return
+		}
+
+		//Delete the previous Refresh Token
+		deleted, delErr := utility.RedisDelete(userAgent + "-" + claims["user_id"].(string) + "-" + refreshUuid)
+		if delErr != nil || deleted == 0 { //if any goes wrong
+			c.JSON(http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		deleted, delErr = utility.RedisDelete(userAgent + "-" + claims["user_id"].(string) + "-" + claims["access_uuid"].(string))
+		if delErr != nil || deleted == 0 { //if any goes wrong
+			c.JSON(http.StatusUnauthorized, "unauthorized")
+			return
+		}
+		//Create new pairs of refresh and access tokens
+		ts, createErr := auth.CreateToken(int(userId), fmt.Sprintf("%v", claims["type"]), false)
+		if createErr != nil {
+			c.JSON(http.StatusForbidden, createErr.Error())
+			return
+		}
+		//save the tokens metadata to redis
+		saveErr := auth.CreateAccessRecord(int(userId), ts, c)
+		if saveErr != nil {
+			c.JSON(http.StatusForbidden, saveErr.Error())
+			return
+		}
+		tokens := dto.AuthLoginResponse{
+			AccessToken:  ts.AccessToken,
+			RefreshToken: ts.RefreshToken,
+		}
+		c.JSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", tokens))
+	} else {
+		c.JSON(http.StatusUnauthorized, response.BuildErrorResponse(http.StatusUnauthorized, "error", "refresh expired", nil, nil))
+	}
 }

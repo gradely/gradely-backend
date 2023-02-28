@@ -16,6 +16,7 @@ func AuthUrl(r *gin.Engine, db *sqlx.DB, validate *validator.Validate, ApiVersio
 	authUrl := r.Group(fmt.Sprintf("/%v/auth", ApiVersion))
 	{
 		authUrl.POST("/login", api.Login)
+		authUrl.POST("/refresh", api.RefreshToken)
 	}
 
 	return r

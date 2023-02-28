@@ -88,3 +88,9 @@ type AccessDetails struct {
 	AccessUuid string
 	UserId     uint64
 }
+
+type AuthLoginResponse struct {
+	AccessToken     string `json:"access_token"`
+	RefreshToken    string `json:"refresh_token"`
+	TransmissionKey string `json:"transmission_key"`
+}
