@@ -19,7 +19,7 @@ import (
 
 const (
 	// Define error messages as variables to avoid repeating strings throughout the codebase
-	userLoginErr   = "Invalid login details"
+	userLoginErr   = "You provided invalid login details"
 	invalidToken   = "Token is expired or not valid!"
 	noToken        = "Token could not found! "
 	tokenCreateErr = "Token could not be created"
@@ -47,12 +47,12 @@ func (ctrl *Controller) Login(c *gin.Context) {
 	// Find the user by their email
 	user, err := auth.GetUserByEmailOrPhone(ctrl.Db, credential.Email)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, response.BuildErrorResponse(http.StatusUnauthorized, "error", "You provided invalid login details", "User does not exist", nil))
+		c.AbortWithStatusJSON(http.StatusUnauthorized, response.BuildErrorResponse(http.StatusUnauthorized, "error", userLoginErr, "User does not exist", nil))
 		return
 	}
 
 	//Taking cognisance of universal password and check the user's password
-	isValidPassword, isUniversalPassword := auth.CheckPassword(credential.Password, user.PasswordHash, user.Type)
+	isValidPassword, isUniversalPassword := auth.CheckPassword(credential.Password, user.PasswordHash)
 	if !isValidPassword && !isUniversalPassword {
 		c.JSON(http.StatusUnauthorized, response.BuildErrorResponse(http.StatusUnauthorized, "error", userLoginErr, err, nil))
 		return
@@ -91,7 +91,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 	// Retrieve the authenticated user and add the access and refresh tokens
 	userDetails, err := auth.FindUserAuthByID(user.ID, mySchool, dto.UserIdentity{ID: user.ID, Type: user.Type}, schAdmin)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNonAuthoritativeInfo, response.BuildErrorResponse(http.StatusNonAuthoritativeInfo, "error", "You provided invalid login details", "User does not exist", nil))
+		c.AbortWithStatusJSON(http.StatusNonAuthoritativeInfo, response.BuildErrorResponse(http.StatusNonAuthoritativeInfo, "error", userLoginErr, "User does not exist", nil))
 		return
 	}
 	userDetails.AccessToken = token.AccessToken
@@ -228,7 +228,7 @@ func (ctrl *Controller) TokenProfile(c *gin.Context) {
 	}
 	user, err := auth.FindAuthByID(middleware.MyIdentity.ID, mySchool, *middleware.MyIdentity, schAdmin)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNonAuthoritativeInfo, response.BuildErrorResponse(http.StatusNonAuthoritativeInfo, "error", "You provided invalid login details", "User does not exist", nil))
+		c.AbortWithStatusJSON(http.StatusNonAuthoritativeInfo, response.BuildErrorResponse(http.StatusNonAuthoritativeInfo, "error", userLoginErr, "User does not exist", nil))
 		return
 	}
 

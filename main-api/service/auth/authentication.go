@@ -49,9 +49,9 @@ func ValidateToken(db *sqlx.DB, bearerToken string) (*model.User, error) {
 	// Update the token and its expiration time in the database
 	expires := user.TokenExpires.Time.Add(time.Minute * 1)
 	if time.Now().Before(expires) {
-		db.MustExec("UPDATE user SET token = ?, token_expires = ? WHERE token = ?;", user.Token, time.Now().AddDate(0, 4, 0), user.Token)
+		db.MustExec("UPDATE users SET token = ?, token_expires = ? WHERE token = ?;", user.Token, time.Now().AddDate(0, 4, 0), user.Token)
 	} else {
-		db.MustExec("UPDATE user SET token = ?, token_expires = ? WHERE token = ?;", sql.NullTime{}, sql.NullTime{}, user.Token)
+		db.MustExec("UPDATE users SET token = ?, token_expires = ? WHERE token = ?;", sql.NullTime{}, sql.NullTime{}, user.Token)
 	}
 	return user, nil
 }
@@ -389,7 +389,7 @@ func CheckSecureKeyLen(length int) error {
 }
 
 // CheckPassword checks if the provided password matches the given hash, and whether it is a universal password
-func CheckPassword(password, hash string, userType model.UserType) (bool, bool) {
+func CheckPassword(password, hash string) (bool, bool) {
 	// compare the password with the hash using bcrypt
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err == nil {
