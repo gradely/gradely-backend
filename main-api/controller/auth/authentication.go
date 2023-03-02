@@ -96,7 +96,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 	}
 	userDetails.AccessToken = token.AccessToken
 	userDetails.RefreshToken = token.RefreshToken
-	c.JSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", user))
+	c.JSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", userDetails))
 	return
 }
 
