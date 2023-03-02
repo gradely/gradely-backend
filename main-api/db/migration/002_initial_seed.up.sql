@@ -5453,7 +5453,7 @@ VALUES (1, NULL, 'CFS/2023/0001', 'Teacher', 'User', '08123456789', NULL, 'teach
         '2020-04-18 05:57:17', 1, 'practice', 0, NULL, 0.00, NULL),
        (4, NULL, 'XRA/2023/0063', 'School', 'User', '06123456789', NULL, 'school',
         'plOYGUzUGAgQeAXkVAd3oLw3yxYqoW1G', '$2y$13$DpyQNVBcJ80HGK1zeqa4U.JT.hSboyvxtud6uh1vt0l6YUAhVC4aq', NULL,
-        'testschool@qa.team', NULL, 0, NULL, NULL, 1566822318,
+        'testschool@qa.team', NULL, 10, NULL, NULL, 1566822318,
         1660156079, 'kV8cyGrXrCGFD3AWTnYLReREYTVl652p_1566822318', NULL, 'jkbhsdklufghksludhgkdshfijaoiuh', NULL, NULL,
         NULL, 1, 'practice', 0, NULL, 0.00, NULL);
 
