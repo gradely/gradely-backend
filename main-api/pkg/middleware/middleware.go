@@ -179,7 +179,7 @@ func Authorize(connection *sqlx.DB, userTypes ...model.UserType) gin.HandlerFunc
 		}
 
 		// Check authorized status
-		if authorized, ok := claims["authorized"].(bool); !ok || !authorized {
+		if authorized, ok := claims["authorised"].(bool); !ok || !authorized {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response.UnauthorisedResponse(http.StatusUnauthorized, "Unauthorized", "Not authorized", invalidToken))
 			return
 		}
