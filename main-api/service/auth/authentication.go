@@ -138,9 +138,9 @@ func GetUserProfile(id int) (dto.UserProfileResponse, error) {
 	user := dto.UserProfileResponse{}
 	base := database.GetSqlxDb()
 
-	err := base.Get(&user, `SELECT user.id, code, email, firstname, lastname, phone, image, class, user.is_boarded, verification_status, type, p.id, p.user_id, p.dob, p.mob, p.yob, p.gender, p.address, p.city, p.state, p.country, p.about FROM users 
-		LEFT JOIN user_profile p ON p.user_id = user.id
-		WHERE status != 0 AND user.id=?`, id)
+	err := base.Get(&user, `SELECT users.id, code, email, firstname, lastname, phone, image, class, users.is_boarded, verification_status, type, p.id, p.user_id, p.dob, p.mob, p.yob, p.gender, p.address, p.city, p.state, p.country, p.about FROM users 
+		LEFT JOIN user_profile p ON p.user_id = users.id
+		WHERE status != 0 AND users.id=?`, id)
 	if err != nil {
 		return user, fmt.Errorf("error while getting user profile: %w", err)
 	}

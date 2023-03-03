@@ -25,8 +25,8 @@ func AuthUrl(r *gin.Engine, db *sqlx.DB, validate *validator.Validate, ApiVersio
 	{
 		authProfileUrl.POST("/check", api.CheckToken)
 		authProfileUrl.GET("/profile", api.TokenProfile)
-		//authProfileUrl.GET("/fetch-profile", api.FetchProfile)
-		//authProfileUrl.PUT("/profile-image", api.UpdateProfileImage)
+		authProfileUrl.GET("/fetch-profile", api.FetchProfile)
+		authProfileUrl.PUT("/profile-image", api.UpdateProfileImage)
 		//authProfileUrl.GET("/my-wallet", api.GetMyWallet)
 		//authProfileUrl.POST("/get-relations", api.GetStudentRelations)
 		//authProfileUrl.POST("/connect-with-student", api.ConnectToStudent)

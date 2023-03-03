@@ -10,6 +10,7 @@ import (
 	response "github.com/gradely/gradely-backend/pkg/common"
 	"github.com/gradely/gradely-backend/pkg/middleware"
 	"github.com/gradely/gradely-backend/service/auth"
+	service "github.com/gradely/gradely-backend/service/user"
 	"github.com/gradely/gradely-backend/utility"
 	"io"
 	"log"
@@ -233,4 +234,46 @@ func (ctrl *Controller) TokenProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", user))
+}
+
+func (ctrl *Controller) FetchProfile(c *gin.Context) {
+	user, err := auth.GetUserProfile(middleware.MyIdentity.ID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNonAuthoritativeInfo, response.BuildErrorResponse(http.StatusNonAuthoritativeInfo, "error", "You provided invalid login details", "User does not exist", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, response.BuildResponse(http.StatusOK, "success", user))
+}
+
+func (ctrl *Controller) UpdateProfileImage(c *gin.Context) {
+	currentUser := middleware.MyIdentity
+	req := struct {
+		Image string `json:"image" validate:"required"`
+	}{}
+
+	err := c.ShouldBind(&req)
+	if err != nil {
+		rd := response.BuildErrorResponse(http.StatusBadRequest, "error", "Failed to parse request body", nil, nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	err = ctrl.Validate.Struct(&req)
+	if err != nil {
+		rd := response.BuildErrorResponse(http.StatusBadRequest, "error", "Validation failed", utility.ValidationResponse(err, ctrl.Validate), nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	status, err := service.UpdateUserImage(req.Image, currentUser.ID, ctrl.Db)
+	if err != nil {
+		rd := response.BuildErrorResponse(http.StatusInternalServerError, "error", "An error occured while updating image", nil, nil)
+		c.JSON(http.StatusInternalServerError, rd)
+		return
+	}
+
+	rd := response.BuildResponse(http.StatusOK, "success", gin.H{"status": status})
+	c.JSON(http.StatusOK, rd)
+
 }
