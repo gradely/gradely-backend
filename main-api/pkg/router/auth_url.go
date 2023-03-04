@@ -18,7 +18,7 @@ func AuthUrl(r *gin.Engine, db *sqlx.DB, validate *validator.Validate, ApiVersio
 	{
 		authUrl.POST("/login", api.Login)
 		authUrl.POST("/refresh", api.RefreshToken)
-		//authUrl.POST("/find-student-with-code", api.FindStudentWithCode)
+		authUrl.POST("/find-student-with-code", api.FindStudentWithCode)
 	}
 
 	authProfileUrl := r.Group(fmt.Sprintf("/%v/auth", ApiVersion), middleware.Authorize(db))
@@ -27,10 +27,9 @@ func AuthUrl(r *gin.Engine, db *sqlx.DB, validate *validator.Validate, ApiVersio
 		authProfileUrl.GET("/profile", api.TokenProfile)
 		authProfileUrl.GET("/fetch-profile", api.FetchProfile)
 		authProfileUrl.PUT("/profile-image", api.UpdateProfileImage)
-		//authProfileUrl.GET("/my-wallet", api.GetMyWallet)
-		//authProfileUrl.POST("/get-relations", api.GetStudentRelations)
-		//authProfileUrl.POST("/connect-with-student", api.ConnectToStudent)
-		//authProfileUrl.POST("/add-child", api.AddChild)
+		authProfileUrl.POST("/get-relations", api.GetStudentRelations)
+		authProfileUrl.POST("/connect-with-student", api.ConnectToStudent)
+		authProfileUrl.POST("/add-child", api.AddChild)
 	}
 
 	return r

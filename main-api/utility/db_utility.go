@@ -6,6 +6,7 @@ import (
 	"github.com/gradely/gradely-backend/model"
 	"github.com/gradely/gradely-backend/pkg/database"
 	"github.com/gradely/gradely-backend/pkg/middleware"
+	"github.com/gradely/gradely-backend/repository"
 	"github.com/gradely/gradely-backend/service/auth"
 	"github.com/jmoiron/sqlx"
 	"log"
@@ -14,6 +15,9 @@ import (
 
 type Controller struct {
 	Db *sqlx.DB
+}
+type Util struct {
+	Repo repository.Repository
 }
 
 func Identity() *model.User {
@@ -28,7 +32,7 @@ func Identity() *model.User {
 
 }
 
-func CheckExist(db *sqlx.DB, query string, args ...interface{}) bool {
+func (util Util) CheckExist(db *sqlx.DB, query string, args ...interface{}) bool {
 	var exists bool
 	query = fmt.Sprintf("SELECT exists (%s)", query)
 	err := db.QueryRow(query, args...).Scan(&exists)

@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/gradely/gradely-backend/model"
@@ -192,7 +191,7 @@ func GetUserObjectAuth(base *sqlx.DB, user dto.UserAuthResponse, mySchool model.
 		// Update the HaveClass field of the user object
 		err = base.Get(&user.HaveClass, "SELECT EXISTS (SELECT id FROM student_school WHERE student_id = ? AND status = 1 AND is_active_class = 1)", myIdentity.ID)
 		if err != nil {
-			LogErrorSentry(err)
+			//middleware.LogErrorSentry(err)
 		}
 
 	case "parent":
@@ -212,17 +211,17 @@ func GetUserObjectAuth(base *sqlx.DB, user dto.UserAuthResponse, mySchool model.
 		// Update the IsTutor, IsTutorBoarded, and HaveClass fields of the user object
 		err := base.Get(&user.IsTutor, "SELECT EXISTS (SELECT schools.id FROM schools INNER JOIN school_teachers st ON st.school_id = schools.id WHERE st.teacher_id = ? AND schools.is_tutor = 1)", myIdentity.ID)
 		if err != nil {
-			LogErrorSentry(err)
+			//middleware.LogErrorSentry(err)
 		}
 
 		err = base.Get(&user.IsTutorBoarded, "SELECT EXISTS (SELECT id FROM tutor_profile WHERE tutor_id = ?)", myIdentity.ID)
 		if err != nil {
-			LogErrorSentry(err)
+			//middleware.LogErrorSentry(err)
 		}
 
 		err = base.Get(&user.HaveClass, "SELECT EXISTS (SELECT id FROM teacher_class WHERE teacher_id = ? AND status = 1)", myIdentity.ID)
 		if err != nil {
-			LogErrorSentry(err)
+			//middleware.LogErrorSentry(err)
 		}
 	}
 
@@ -550,24 +549,7 @@ func GetCurrentSession() (string, error) {
 	return session, err
 }
 
-// LogErrorSentry logs the given error to Sentry
-func LogErrorSentry(err interface{}) {
-	// Only log the error if it is not nil and the environment is not "local"
-	if err != nil && config.Params.Environment != "local" {
-		errorMessage, ok := err.(error)
-		if !ok {
-			// If the error is not an error type, capture the error message
-			sentry.CaptureMessage(fmt.Sprintf("Message: %v", err))
-		} else {
-			// If the error is an error type, capture the exception with the error message
-			sentry.WithScope(func(scope *sentry.Scope) {
-				sentry.CaptureException(errorMessage)
-			})
-		}
-	}
-}
-
-// FindAuthByID FindByID method
+// FindAuthByID  method
 func FindAuthByID(id int, mySchool model.School, myIdentity dto.UserIdentity, schoolAdmin model.SchoolAdmin) (dto.UserAuthResponse, error) {
 	user := dto.UserAuthResponse{}
 	base := database.GetSqlxDb()
@@ -578,4 +560,15 @@ func FindAuthByID(id int, mySchool model.School, myIdentity dto.UserIdentity, sc
 	globalClassID, _ := GetGlobalClassWithStudentID(base, id)
 	user.Class = &globalClassID
 	return GetUserObjectAuth(base, user, mySchool, myIdentity, schoolAdmin)
+}
+
+// FindByID  method
+func FindByID(id int) (model.User, error) {
+	user := model.User{}
+	base := database.GetSqlxDb()
+
+	if err := base.Get(&user, `SELECT id, code, email, firstname, lastname, phone, image, class, is_boarded, verification_status, type FROM users WHERE status != 0 AND id=?`, id); err != nil {
+		return user, err
+	}
+	return user, nil
 }
