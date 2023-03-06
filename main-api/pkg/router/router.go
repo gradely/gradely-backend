@@ -9,6 +9,13 @@ import (
 	"net/http"
 )
 
+//type ServiceInitiator struct {
+//}
+//
+//func NewServiceInitiator() *ServiceInitiator {
+//	return &ServiceInitiator{}
+//}
+
 // Setup function initializes and returns a gin Engine with necessary middlewares and routes.
 func Setup(db *sqlx.DB, validate *validator.Validate) *gin.Engine {
 	// Create a new gin engine.

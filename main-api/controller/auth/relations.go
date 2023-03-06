@@ -9,6 +9,14 @@ import (
 	"net/http"
 )
 
+//type usecase struct {
+//	book_repo Controller
+//}
+//
+//func NewUseCase(book_repo Service) Service {
+//	return &usecase{book_repo: book_repo}
+//}
+
 func (ctrl *Controller) FindStudentWithCode(c *gin.Context) {
 	form := struct {
 		Code string `json:"code"  validate:"required"`
@@ -30,7 +38,7 @@ func (ctrl *Controller) FindStudentWithCode(c *gin.Context) {
 
 	user, err := auth.FindStudentWithCode(form.Code)
 	if err != nil {
-		rd := response.BuildErrorResponse(http.StatusInternalServerError, "error", err.Error(), err, nil)
+		rd := response.BuildErrorResponse(http.StatusInternalServerError, "error", "Record not found", err, nil)
 		c.JSON(http.StatusInternalServerError, rd)
 		return
 	}
@@ -59,7 +67,7 @@ func (ctrl *Controller) ConnectToStudent(c *gin.Context) {
 		return
 	}
 
-	err = auth.ConnectToStudent(form.ID, form.Relationship, middleware.MyIdentity)
+	err = ctrl.Service.ConnectToStudent(form.ID, form.Relationship, middleware.MyIdentity)
 	if err != nil {
 		rd := response.BuildErrorResponse(http.StatusInternalServerError, "error", err.Error(), err, nil)
 		c.JSON(http.StatusInternalServerError, rd)
@@ -91,7 +99,7 @@ func (ctrl *Controller) AddChild(c *gin.Context) {
 		return
 	}
 
-	child, err := auth.AddChild(form.FirstName, form.LastName, form.Class, form.Relationship, middleware.MyIdentity)
+	child, err := ctrl.Service.AddChild(form.FirstName, form.LastName, form.Class, form.Relationship, middleware.MyIdentity)
 	if err != nil {
 		rd := response.BuildErrorResponse(http.StatusInternalServerError, "error", err.Error(), err, nil)
 		c.JSON(http.StatusInternalServerError, rd)
@@ -123,7 +131,7 @@ func (ctrl *Controller) GetStudentRelations(c *gin.Context) {
 		return
 	}
 
-	relations, err := auth.GetStudentRelations(form.Code, form.Email, form.Phone, middleware.MyIdentity)
+	relations, err := ctrl.Service.GetStudentRelations(form.Code, form.Email, form.Phone, middleware.MyIdentity)
 	if err != nil {
 		rd := response.BuildErrorResponse(http.StatusInternalServerError, "error", err.Error(), err, nil)
 		c.JSON(http.StatusInternalServerError, rd)

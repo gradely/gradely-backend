@@ -6,12 +6,14 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gradely/gradely-backend/controller/auth"
 	"github.com/gradely/gradely-backend/pkg/middleware"
+	auth2 "github.com/gradely/gradely-backend/service/auth"
 	"github.com/jmoiron/sqlx"
 )
 
 func AuthUrl(r *gin.Engine, db *sqlx.DB, validate *validator.Validate, ApiVersion string) *gin.Engine {
 
-	api := auth.Controller{Db: db, Validate: validate}
+	service := auth2.NewAuthService()
+	api := auth.Controller{Db: db, Validate: validate, Service: service}
 
 	// Create auth route group
 	authUrl := r.Group(fmt.Sprintf("/%v/auth", ApiVersion))
