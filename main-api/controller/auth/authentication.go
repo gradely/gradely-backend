@@ -222,7 +222,7 @@ func (ctrl *Controller) TokenProfile(c *gin.Context) {
 	var mySchool model.School
 	var schAdmin model.SchoolAdmin
 	if middleware.MyIdentity.Type == "school" {
-		mySchool = utility.MySchoolObject()
+		mySchool = utility.MySchoolObject(middleware.MyIdentity.ID, 0)
 		if middleware.MyIdentity.ID != mySchool.UserID {
 			schAdmin = utility.GetSchoolAdmin(ctrl.Db, middleware.MyIdentity.ID)
 		}

@@ -32,7 +32,7 @@ func TestAuthorize(t *testing.T) {
 		"user_id":          "1",
 		"access_uuid":      "1234567890",
 		"universal_access": true,
-		"authorized":       true,
+		"authorised":       true,
 	})
 
 	// Sign the token with a secret key

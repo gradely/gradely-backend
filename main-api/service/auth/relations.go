@@ -5,16 +5,12 @@ import (
 	"github.com/gradely/gradely-backend/model"
 	"github.com/gradely/gradely-backend/model/dto"
 	"github.com/gradely/gradely-backend/pkg/database"
+	"github.com/gradely/gradely-backend/utility"
 	"github.com/jmoiron/sqlx"
 	"strconv"
 	"strings"
 	"time"
 )
-
-//type Service struct {
-//	Repository repository.GeneralRepository
-//	//Utility    utility.Repository
-//}
 
 // FindStudentWithCode retrieves student details based on the given student code
 func FindStudentWithCode(code string) (*dto.FindStudentResponse, error) {
@@ -83,17 +79,13 @@ func (util *serviceAuth) ConnectToStudent(studentID int, relationship string, us
 		return err
 	}
 
-	fmt.Println("The code is ", util.GenerateUserCode(12345))
-
 	// Verify that the retrieved user is a student
 	if student.Type != "student" {
 		return fmt.Errorf("user with ID %d is not a student", studentID)
 	}
 
-	//exists := util.Repo.Utility.CheckExist(db, `SELECT id FROM parents WHERE parent_id=? AND student_id=? AND status=1`, user.ID, studentID)
-
 	// Check if a record already exists in the parents table for the given parent and student
-	exists := true //Util{Repo: repository.Repository{}}.Repo.Utility.CheckExist(db, `SELECT id FROM parents WHERE parent_id=? AND student_id=? AND status=1`, user.ID, studentID)
+	exists := utility.CheckExist(db, `SELECT id FROM parents WHERE parent_id=? AND student_id=? AND status=1`, user.ID, studentID)
 	if exists || studentID == user.ID {
 		// If a record already exists or the student ID is the same as the parent ID, return without creating a new record
 		return nil
@@ -135,7 +127,7 @@ func (util *serviceAuth) AddChild(firstname, lastname string, class int, relatio
 	}
 
 	// Generate and update the child user's code
-	childCode := 3 //Util{Repository: repository.Repository{}}.GenerateUserCode(int(childID))
+	childCode := util.GenerateUserCode(int(childID))
 	updateUser := `UPDATE users SET code = ? WHERE id = ?`
 	_, err = db.Exec(updateUser, childCode, childID)
 	if err != nil {
@@ -182,9 +174,6 @@ func (util *serviceAuth) GetStudentRelations(code, email, phone string, currentU
 		user  model.User
 	)
 
-	fmt.Println("The code is ", util.GenerateUserCode(12345))
-
-	//util := Util{Repository: repository.Repository{}}
 	if code != "" {
 		user, _ = util.FindByCredentials(code)
 	} else if email != "" {
@@ -224,11 +213,8 @@ func (util *serviceAuth) GenerateUserCode(userID int) string {
 		le = 0
 	}
 	id := strings.Repeat("0", le) + strconv.Itoa(userID)
-	//repo := repository.Repository{Utility: util.Repository.Utility}
-	//util.GenerateLetters(3)
 
-	//randChar := strings.ToUpper(util.Repository.GenerateLetters(3))
-	randChar := strings.ToUpper("BSD")
+	randChar := strings.ToUpper(utility.GenerateLetters(3))
 	year := strconv.Itoa(time.Now().Year())
 
 	return randChar + `/` + year + `/` + id
@@ -239,13 +225,12 @@ func (util *serviceAuth) FindByCredentials(email string) (model.User, error) {
 	base := database.GetSqlxDb()
 
 	// Check if email is a valid phone number
-	if true {
-		//if number, err := util.Repository.ValidateNumber(email); err == nil {
+	if number, err := utility.ValidateNumber(email); err == nil {
 		// Use the phone number to search for the user
 		query := `SELECT id, code, email, firstname, lastname, phone, IF(image LIKE '%http%', image, CONCAT('https://live.gradely.ng/images/users/', image)) image, class, is_boarded, verification_status, password_hash, type
 				  FROM users
 				  WHERE status != 0 AND (phone=? OR code=?)`
-		err := base.Get(&user, query, "number", email)
+		err := base.Get(&user, query, number, email)
 		if err != nil {
 			return user, err
 		}
