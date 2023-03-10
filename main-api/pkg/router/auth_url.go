@@ -34,5 +34,12 @@ func AuthUrl(r *gin.Engine, db *sqlx.DB, validate *validator.Validate, ApiVersio
 		authProfileUrl.POST("/add-child", api.AddChild)
 	}
 
+	verifyUrl := r.Group(fmt.Sprintf("/%v/auth", ApiVersion), middleware.Authorize(db))
+	{
+		verifyUrl.POST("/verify-account", api.RequestAccountVerification)
+		//verifyUrl.PUT("/verify-account", api.VerifyCode)
+		//verifyUrl.PUT("/update-contact-without-code", api.UpdateContactWithoutCode)
+	}
+
 	return r
 }

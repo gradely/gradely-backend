@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"database/sql"
 	"github.com/gradely/gradely-backend/model"
 	"time"
 )
@@ -120,4 +121,16 @@ type UserRelationsResponse struct {
 	Type      model.UserType `db:"type" json:"type"`
 	Email     *string        `db:"email" json:"email"`
 	ClassID   *int           `db:"class_id" json:"class_id"`
+}
+
+type AccountVerificationLog struct {
+	ID         int
+	UserID     int
+	Channel    string
+	Code       string
+	CodeExpiry time.Time
+	Token      sql.NullString
+	Type       sql.NullString
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }

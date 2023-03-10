@@ -45,8 +45,7 @@ func ValidateNumber(number string) (string, error) {
 	}
 
 	// If the number is a valid Nigerian phone number, return it
-	includeLandLine := true // include landlines in the search
-	if country := phonenumber.GetISO3166ByNumber(number, includeLandLine); country.CountryName != "" {
+	if country := phonenumber.GetISO3166ByNumber(number, true); country.CountryName != "" {
 		return number, nil
 	}
 
@@ -78,6 +77,16 @@ func GenerateString(length int) string {
 
 func GenerateLetters(length int) string {
 	table := [...]byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
+	b := make([]byte, length)
+	_, _ = io.ReadAtLeast(rand.Reader, b, length)
+	for i := 0; i < len(b); i++ {
+		b[i] = table[int(b[i])%len(table)]
+	}
+	return string(b)
+}
+
+func GenerateNumbers(length int) string {
+	table := [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9'}
 	b := make([]byte, length)
 	_, _ = io.ReadAtLeast(rand.Reader, b, length)
 	for i := 0; i < len(b); i++ {
