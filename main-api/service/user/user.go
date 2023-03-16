@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func UpdateUserImage(image string, userID int, db *sqlx.DB) (bool, error) {
+func (util *serviceUser) UpdateUserImage(image string, userID int, db *sqlx.DB) (bool, error) {
 	rowChange, err := db.MustExec("UPDATE users SET image=? WHERE id=?", image, userID).RowsAffected()
 	return rowChange != 0, err
 }

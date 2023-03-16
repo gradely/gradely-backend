@@ -19,10 +19,11 @@ import (
 )
 
 type Controller struct {
-	Db       *sqlx.DB
-	Validate *validator.Validate
-	Utility  repository.GeneralRepository
-	Service  auth.ServiceAuth
+	Db          *sqlx.DB
+	Validate    *validator.Validate
+	Utility     repository.GeneralRepository
+	Service     auth.ServiceAuth
+	ServiceUser service.ServiceUser
 }
 
 // RequestAccountVerification generates a verification code for the current user's account

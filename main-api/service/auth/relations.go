@@ -13,7 +13,7 @@ import (
 )
 
 // FindStudentWithCode retrieves student details based on the given student code
-func FindStudentWithCode(code string) (*dto.FindStudentResponse, error) {
+func (util *serviceAuth) FindStudentWithCode(code string) (*dto.FindStudentResponse, error) {
 	// Get a database connection
 	db := database.GetSqlxDb()
 

@@ -10,7 +10,6 @@ import (
 	response "github.com/gradely/gradely-backend/pkg/common"
 	"github.com/gradely/gradely-backend/pkg/middleware"
 	"github.com/gradely/gradely-backend/service/auth"
-	service "github.com/gradely/gradely-backend/service/user"
 	"github.com/gradely/gradely-backend/utility"
 	"io"
 	"log"
@@ -46,20 +45,20 @@ func (ctrl *Controller) Login(c *gin.Context) {
 	}
 
 	// Find the user by their email
-	user, err := auth.GetUserByEmailOrPhone(ctrl.Db, credential.Email)
+	user, err := ctrl.Service.GetUserByEmailOrPhone(ctrl.Db, credential.Email)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, response.BuildErrorResponse(http.StatusUnauthorized, "error", userLoginErr, "User does not exist", nil))
 		return
 	}
 
 	//Taking cognisance of universal password and check the user's password
-	isValidPassword, isUniversalPassword := auth.CheckPassword(credential.Password, user.PasswordHash)
+	isValidPassword, isUniversalPassword := ctrl.Service.CheckPassword(credential.Password, user.PasswordHash)
 	if !isValidPassword && !isUniversalPassword {
 		c.JSON(http.StatusUnauthorized, response.BuildErrorResponse(http.StatusUnauthorized, "error", userLoginErr, err, nil))
 		return
 	}
 	// Create an access token
-	token, err := auth.CreateToken(user.ID, string(user.Type), isUniversalPassword)
+	token, err := ctrl.Service.CreateToken(user.ID, string(user.Type), isUniversalPassword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.BuildErrorResponse(http.StatusInternalServerError, "500", tokenCreateErr, err, nil))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, tokenCreateErr)
@@ -68,7 +67,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 
 	// Save the access record if the user is not using the universal password
 	if !isUniversalPassword {
-		saveErr := auth.CreateAccessRecord(user.ID, token, c)
+		saveErr := ctrl.Service.CreateAccessRecord(user.ID, token, c)
 		if saveErr != nil {
 			c.JSON(http.StatusInternalServerError, response.BuildErrorResponse(http.StatusInternalServerError, "500", tokenCreateErr, saveErr, nil))
 			c.AbortWithStatusJSON(http.StatusInternalServerError, tokenCreateErr)
@@ -152,13 +151,13 @@ func (ctrl *Controller) RefreshToken(c *gin.Context) {
 			return
 		}
 		//Create new pairs of refresh and access tokens
-		ts, createErr := auth.CreateToken(int(userId), fmt.Sprintf("%v", claims["type"]), false)
+		ts, createErr := ctrl.Service.CreateToken(int(userId), fmt.Sprintf("%v", claims["type"]), false)
 		if createErr != nil {
 			c.JSON(http.StatusForbidden, createErr.Error())
 			return
 		}
 		//save the tokens metadata to redis
-		saveErr := auth.CreateAccessRecord(int(userId), ts, c)
+		saveErr := ctrl.Service.CreateAccessRecord(int(userId), ts, c)
 		if saveErr != nil {
 			c.JSON(http.StatusForbidden, saveErr.Error())
 			return
@@ -174,7 +173,7 @@ func (ctrl *Controller) RefreshToken(c *gin.Context) {
 }
 
 func (ctrl *Controller) CheckToken(c *gin.Context) {
-	tokenStr := auth.ExtractToken(c)
+	tokenStr := ctrl.Service.ExtractToken(c)
 	userAgent := auth.GetUserAgent(c)
 	if tokenStr == "" {
 		c.JSON(http.StatusUnauthorized, response.UnauthorisedResponse(http.StatusUnauthorized, fmt.Sprint(http.StatusUnauthorized), "Unauthorized", noToken))
@@ -237,7 +236,7 @@ func (ctrl *Controller) TokenProfile(c *gin.Context) {
 }
 
 func (ctrl *Controller) FetchProfile(c *gin.Context) {
-	user, err := auth.GetUserProfile(middleware.MyIdentity.ID)
+	user, err := ctrl.Service.GetUserProfile(middleware.MyIdentity.ID)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNonAuthoritativeInfo, response.BuildErrorResponse(http.StatusNonAuthoritativeInfo, "error", "You provided invalid login details", "User does not exist", err))
 		return
@@ -266,7 +265,7 @@ func (ctrl *Controller) UpdateProfileImage(c *gin.Context) {
 		return
 	}
 
-	status, err := service.UpdateUserImage(req.Image, currentUser.ID, ctrl.Db)
+	status, err := ctrl.ServiceUser.UpdateUserImage(req.Image, currentUser.ID, ctrl.Db)
 	if err != nil {
 		rd := response.BuildErrorResponse(http.StatusInternalServerError, "error", "An error occured while updating image", nil, nil)
 		c.JSON(http.StatusInternalServerError, rd)

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	response "github.com/gradely/gradely-backend/pkg/common"
 	"github.com/gradely/gradely-backend/pkg/middleware"
-	"github.com/gradely/gradely-backend/service/auth"
 	"github.com/gradely/gradely-backend/utility"
 	"net/http"
 )
@@ -36,7 +35,7 @@ func (ctrl *Controller) FindStudentWithCode(c *gin.Context) {
 		return
 	}
 
-	user, err := auth.FindStudentWithCode(form.Code)
+	user, err := ctrl.Service.FindStudentWithCode(form.Code)
 	if err != nil {
 		rd := response.BuildErrorResponse(http.StatusInternalServerError, "error", "Record not found", err, nil)
 		c.JSON(http.StatusInternalServerError, rd)

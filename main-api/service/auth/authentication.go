@@ -74,7 +74,7 @@ func GetUserByID(db *sqlx.DB, id string) (*model.User, error) {
 }
 
 // GetUserByEmailOrPhone finds a user by their email or phone number and returns the user
-func GetUserByEmailOrPhone(db *sqlx.DB, emailOrPhone string) (*model.User, error) {
+func (util *serviceAuth) GetUserByEmailOrPhone(db *sqlx.DB, emailOrPhone string) (*model.User, error) {
 	user := &model.User{}
 	query := `
 		SELECT id, code, email, firstname, lastname, phone, IF(image LIKE '%http%', image, CONCAT('https://live.gradely.ng/images/users/', image)) image,
@@ -133,7 +133,7 @@ func GetGlobalClassWithStudentID(db *sqlx.DB, childID int) (int, error) {
 }
 
 // GetUserProfile retrieves a user's profile data by ID.
-func GetUserProfile(id int) (dto.UserProfileResponse, error) {
+func (util *serviceAuth) GetUserProfile(id int) (dto.UserProfileResponse, error) {
 	user := dto.UserProfileResponse{}
 	base := database.GetSqlxDb()
 
@@ -238,7 +238,7 @@ func GetUserObjectAuth(base *sqlx.DB, user dto.UserAuthResponse, mySchool model.
 }
 
 // CreateToken function creates and returns access and refresh tokens
-func CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenDetailsDTO, error) {
+func (util *serviceAuth) CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenDetailsDTO, error) {
 	// Get the server configuration
 	getConfig := config.GetConfig()
 
@@ -388,7 +388,7 @@ func CheckSecureKeyLen(length int) error {
 }
 
 // CheckPassword checks if the provided password matches the given hash, and whether it is a universal password
-func CheckPassword(password, hash string) (bool, bool) {
+func (util *serviceAuth) CheckPassword(password, hash string) (bool, bool) {
 	// compare the password with the hash using bcrypt
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err == nil {
@@ -406,7 +406,7 @@ func CheckPassword(password, hash string) (bool, bool) {
 // CreateAccessRecord creates an access record in Redis with the provided userid, TokenDetailsDTO and Gin context.
 // It extracts the user agent from the Gin context and uses it as a prefix for the Redis key.
 // It also deletes any existing Redis keys with the same prefix.
-func CreateAccessRecord(userid int, td *dto.TokenDetailsDTO, c *gin.Context) error {
+func (util *serviceAuth) CreateAccessRecord(userid int, td *dto.TokenDetailsDTO, c *gin.Context) error {
 	// Extract user agent from Gin context
 	userAgent := GetUserAgent(c)
 	// Use user agent and userid as key prefix
@@ -445,7 +445,7 @@ func CreateAccessRecord(userid int, td *dto.TokenDetailsDTO, c *gin.Context) err
 }
 
 // ExtractToken extracts the token from the Authorization header in the Gin context.
-func ExtractToken(c *gin.Context) string {
+func (util *serviceAuth) ExtractToken(c *gin.Context) string {
 	bearToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearToken, " ")
 	if len(strArr) == 2 {
