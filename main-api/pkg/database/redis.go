@@ -25,6 +25,9 @@ func SetupRedis() {
 		fmt.Printf("The redis conection: %v:%v", getConfig.Redis.RedisHost, getConfig.Redis.RedisPort)
 		log.Fatalln("Redis db error: ", err)
 	}
+
+	// Set the global variable
+	Rds = rdb
 }
 
 func GetRedisDb() *redis.Client {

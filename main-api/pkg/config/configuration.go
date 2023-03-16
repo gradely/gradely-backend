@@ -75,6 +75,8 @@ func Setup(configFile string) {
 			log.Fatalf("error decoding config: %s", err.Error())
 		}
 	}
+
+	Params = *params
 	Config = &Configuration{
 		Server:   *server,
 		Database: *database,

@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/gradely/gradely-backend/model"
@@ -17,7 +16,6 @@ import (
 	ua "github.com/mileusna/useragent"
 	"github.com/twinj/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	mathRand "math/rand"
 	"strconv"
 	"strings"
@@ -50,9 +48,9 @@ func ValidateToken(db *sqlx.DB, bearerToken string) (*model.User, error) {
 	// Update the token and its expiration time in the database
 	expires := user.TokenExpires.Time.Add(time.Minute * 1)
 	if time.Now().Before(expires) {
-		db.MustExec("UPDATE user SET token = ?, token_expires = ? WHERE token = ?;", user.Token, time.Now().AddDate(0, 4, 0), user.Token)
+		db.MustExec("UPDATE users SET token = ?, token_expires = ? WHERE token = ?;", user.Token, time.Now().AddDate(0, 4, 0), user.Token)
 	} else {
-		db.MustExec("UPDATE user SET token = ?, token_expires = ? WHERE token = ?;", sql.NullTime{}, sql.NullTime{}, user.Token)
+		db.MustExec("UPDATE users SET token = ?, token_expires = ? WHERE token = ?;", sql.NullTime{}, sql.NullTime{}, user.Token)
 	}
 	return user, nil
 }
@@ -76,7 +74,7 @@ func GetUserByID(db *sqlx.DB, id string) (*model.User, error) {
 }
 
 // GetUserByEmailOrPhone finds a user by their email or phone number and returns the user
-func GetUserByEmailOrPhone(db *sqlx.DB, emailOrPhone string) (*model.User, error) {
+func (util *serviceAuth) GetUserByEmailOrPhone(db *sqlx.DB, emailOrPhone string) (*model.User, error) {
 	user := &model.User{}
 	query := `
 		SELECT id, code, email, firstname, lastname, phone, IF(image LIKE '%http%', image, CONCAT('https://live.gradely.ng/images/users/', image)) image,
@@ -135,13 +133,13 @@ func GetGlobalClassWithStudentID(db *sqlx.DB, childID int) (int, error) {
 }
 
 // GetUserProfile retrieves a user's profile data by ID.
-func GetUserProfile(id int) (dto.UserProfileResponse, error) {
+func (util *serviceAuth) GetUserProfile(id int) (dto.UserProfileResponse, error) {
 	user := dto.UserProfileResponse{}
 	base := database.GetSqlxDb()
 
-	err := base.Get(&user, `SELECT user.id, code, email, firstname, lastname, phone, image, class, user.is_boarded, verification_status, type, p.id, p.user_id, p.dob, p.mob, p.yob, p.gender, p.address, p.city, p.state, p.country, p.about FROM users 
-		LEFT JOIN user_profile p ON p.user_id = user.id
-		WHERE status != 0 AND user.id=?`, id)
+	err := base.Get(&user, `SELECT users.id, code, email, firstname, lastname, phone, image, class, users.is_boarded, verification_status, type, p.id, p.user_id, p.dob, p.mob, p.yob, p.gender, p.address, p.city, p.state, p.country, p.about FROM users 
+		LEFT JOIN user_profile p ON p.user_id = users.id
+		WHERE status != 0 AND users.id=?`, id)
 	if err != nil {
 		return user, fmt.Errorf("error while getting user profile: %w", err)
 	}
@@ -193,7 +191,7 @@ func GetUserObjectAuth(base *sqlx.DB, user dto.UserAuthResponse, mySchool model.
 		// Update the HaveClass field of the user object
 		err = base.Get(&user.HaveClass, "SELECT EXISTS (SELECT id FROM student_school WHERE student_id = ? AND status = 1 AND is_active_class = 1)", myIdentity.ID)
 		if err != nil {
-			LogErrorSentry(err)
+			//middleware.LogErrorSentry(err)
 		}
 
 	case "parent":
@@ -213,17 +211,17 @@ func GetUserObjectAuth(base *sqlx.DB, user dto.UserAuthResponse, mySchool model.
 		// Update the IsTutor, IsTutorBoarded, and HaveClass fields of the user object
 		err := base.Get(&user.IsTutor, "SELECT EXISTS (SELECT schools.id FROM schools INNER JOIN school_teachers st ON st.school_id = schools.id WHERE st.teacher_id = ? AND schools.is_tutor = 1)", myIdentity.ID)
 		if err != nil {
-			LogErrorSentry(err)
+			//middleware.LogErrorSentry(err)
 		}
 
 		err = base.Get(&user.IsTutorBoarded, "SELECT EXISTS (SELECT id FROM tutor_profile WHERE tutor_id = ?)", myIdentity.ID)
 		if err != nil {
-			LogErrorSentry(err)
+			//middleware.LogErrorSentry(err)
 		}
 
 		err = base.Get(&user.HaveClass, "SELECT EXISTS (SELECT id FROM teacher_class WHERE teacher_id = ? AND status = 1)", myIdentity.ID)
 		if err != nil {
-			LogErrorSentry(err)
+			//middleware.LogErrorSentry(err)
 		}
 	}
 
@@ -240,18 +238,18 @@ func GetUserObjectAuth(base *sqlx.DB, user dto.UserAuthResponse, mySchool model.
 }
 
 // CreateToken function creates and returns access and refresh tokens
-func CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenDetailsDTO, error) {
+func (util *serviceAuth) CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenDetailsDTO, error) {
 	// Get the server configuration
-	config := config.GetConfig()
+	getConfig := config.GetConfig()
 
 	// Create an empty TokenDetailsDTO object
 	td := &dto.TokenDetailsDTO{}
 
 	// Set access token expire time
-	td.AtExpiresTime = time.Now().Add(time.Hour * time.Duration(config.Server.AccessTokenExpireDuration))
+	td.AtExpiresTime = time.Now().Add(time.Hour * time.Duration(getConfig.Server.AccessTokenExpireDuration))
 
 	// Set refresh token expire time
-	td.RtExpiresTime = time.Now().Add(time.Hour * time.Duration(config.Server.RefreshTokenExpireDuration))
+	td.RtExpiresTime = time.Now().Add(time.Hour * time.Duration(getConfig.Server.RefreshTokenExpireDuration))
 
 	// Generate a new UUID for access and refresh tokens
 	td.AccessUuid = uuid.NewV4().String()
@@ -272,7 +270,7 @@ func CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenD
 
 	// Sign the access token with the server secret
 	var err error
-	td.AccessToken, err = token.SignedString([]byte(config.Server.Secret))
+	td.AccessToken, err = token.SignedString([]byte(getConfig.Server.Secret))
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +288,7 @@ func CreateToken(userID int, userType string, universalAccess bool) (*dto.TokenD
 	rtoken := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 
 	// Sign the refresh token with the server secret
-	td.RefreshToken, err = rtoken.SignedString([]byte(config.Server.Secret))
+	td.RefreshToken, err = rtoken.SignedString([]byte(getConfig.Server.Secret))
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +388,7 @@ func CheckSecureKeyLen(length int) error {
 }
 
 // CheckPassword checks if the provided password matches the given hash, and whether it is a universal password
-func CheckPassword(password, hash string, userType model.UserType) (bool, bool) {
+func (util *serviceAuth) CheckPassword(password, hash string) (bool, bool) {
 	// compare the password with the hash using bcrypt
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err == nil {
@@ -408,7 +406,7 @@ func CheckPassword(password, hash string, userType model.UserType) (bool, bool) 
 // CreateAccessRecord creates an access record in Redis with the provided userid, TokenDetailsDTO and Gin context.
 // It extracts the user agent from the Gin context and uses it as a prefix for the Redis key.
 // It also deletes any existing Redis keys with the same prefix.
-func CreateAccessRecord(userid int, td *dto.TokenDetailsDTO, c *gin.Context) error {
+func (util *serviceAuth) CreateAccessRecord(userid int, td *dto.TokenDetailsDTO, c *gin.Context) error {
 	// Extract user agent from Gin context
 	userAgent := GetUserAgent(c)
 	// Use user agent and userid as key prefix
@@ -447,7 +445,7 @@ func CreateAccessRecord(userid int, td *dto.TokenDetailsDTO, c *gin.Context) err
 }
 
 // ExtractToken extracts the token from the Authorization header in the Gin context.
-func ExtractToken(c *gin.Context) string {
+func (util *serviceAuth) ExtractToken(c *gin.Context) string {
 	bearToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearToken, " ")
 	if len(strArr) == 2 {
@@ -485,13 +483,9 @@ func ExtractTokenMetadata(tokenstr string) (*dto.AccessDetails, error) {
 // FetchAuth fetches the user ID associated with the provided Redis key from Redis.
 func FetchAuth(key string) (string, error) {
 	// Get Redis client from database package
-	log.Println("I ant auto 8.5")
 	rdb := database.GetRedisDb()
-	log.Println("I ant auto 5.6", rdb)
-	log.Println("I ant auto 5.7", database.Ctx, key)
 	// Get value associated with key in Redis
 	userid, err := rdb.Get(database.Ctx, key).Result()
-	log.Println("I ant auto 7")
 	if err != nil {
 		return "", err
 	}
@@ -535,11 +529,11 @@ func UpdateV2Auth(token string, id string, status bool) error {
 	var err error
 	if status {
 		// If the status is true, update the token and token_expires fields
-		query = `UPDATE user SET token = ?, token_expires = ? WHERE id = ?`
+		query = `UPDATE users SET token = ?, token_expires = ? WHERE id = ?`
 		_, err = base.Exec(query, token, time.Now().AddDate(0, 4, 0), id)
 	} else {
 		// If the status is false, set the token and token_expires fields to NULL
-		query = `UPDATE user SET token = NULL, token_expires = NULL WHERE id = ?`
+		query = `UPDATE users SET token = NULL, token_expires = NULL WHERE id = ?`
 		_, err = base.Exec(query, id)
 	}
 	return err
@@ -555,19 +549,26 @@ func GetCurrentSession() (string, error) {
 	return session, err
 }
 
-// LogErrorSentry logs the given error to Sentry
-func LogErrorSentry(err interface{}) {
-	// Only log the error if it is not nil and the environment is not "local"
-	if err != nil && config.Params.Environment != "local" {
-		errorMessage, ok := err.(error)
-		if !ok {
-			// If the error is not an error type, capture the error message
-			sentry.CaptureMessage(fmt.Sprintf("Message: %v", err))
-		} else {
-			// If the error is an error type, capture the exception with the error message
-			sentry.WithScope(func(scope *sentry.Scope) {
-				sentry.CaptureException(errorMessage)
-			})
-		}
+// FindAuthByID  method
+func FindAuthByID(id int, mySchool model.School, myIdentity dto.UserIdentity, schoolAdmin model.SchoolAdmin) (dto.UserAuthResponse, error) {
+	user := dto.UserAuthResponse{}
+	base := database.GetSqlxDb()
+
+	if err := base.Get(&user, `SELECT id, code, email, firstname, lastname, phone, image, class, is_boarded, verification_status, type FROM users WHERE status != 0 AND id=?`, id); err != nil {
+		return user, err
 	}
+	globalClassID, _ := GetGlobalClassWithStudentID(base, id)
+	user.Class = &globalClassID
+	return GetUserObjectAuth(base, user, mySchool, myIdentity, schoolAdmin)
+}
+
+// FindByID  method
+func FindByID(id int) (model.User, error) {
+	user := model.User{}
+	base := database.GetSqlxDb()
+
+	if err := base.Get(&user, `SELECT id, code, email, firstname, lastname, phone, image, class, is_boarded, verification_status, type FROM users WHERE status != 0 AND id=?`, id); err != nil {
+		return user, err
+	}
+	return user, nil
 }

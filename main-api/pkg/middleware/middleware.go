@@ -8,7 +8,9 @@ import (
 	"github.com/gradely/gradely-backend/model/dto"
 	response "github.com/gradely/gradely-backend/pkg/common"
 	"github.com/gradely/gradely-backend/pkg/config"
+	"github.com/gradely/gradely-backend/pkg/database"
 	"github.com/gradely/gradely-backend/service/auth"
+	"github.com/gradely/gradely-backend/utility"
 	"github.com/jmoiron/sqlx"
 	"net/http"
 	"strconv"
@@ -179,7 +181,7 @@ func Authorize(connection *sqlx.DB, userTypes ...model.UserType) gin.HandlerFunc
 		}
 
 		// Check authorized status
-		if authorized, ok := claims["authorized"].(bool); !ok || !authorized {
+		if authorized, ok := claims["authorised"].(bool); !ok || !authorized {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response.UnauthorisedResponse(http.StatusUnauthorized, "Unauthorized", "Not authorized", invalidToken))
 			return
 		}
@@ -205,4 +207,14 @@ func Authorize(connection *sqlx.DB, userTypes ...model.UserType) gin.HandlerFunc
 			Type: model.UserType(activeUserType),
 		}
 	}
+}
+
+func CurrentIdentity() *model.User {
+	db := database.GetSqlxDb()
+	userModel, err := auth.GetUserByID(db, strconv.Itoa(MyIdentity.ID))
+	if err != nil {
+		utility.LogErrorSentry(err)
+		panic("Not validated")
+	}
+	return userModel
 }

@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"database/sql"
 	"github.com/gradely/gradely-backend/model"
 	"time"
 )
@@ -87,4 +88,49 @@ type TokenDetailsDTO struct {
 type AccessDetails struct {
 	AccessUuid string
 	UserId     uint64
+}
+
+type AuthLoginResponse struct {
+	AccessToken     string `json:"access_token"`
+	RefreshToken    string `json:"refresh_token"`
+	TransmissionKey string `json:"transmission_key"`
+}
+
+type FindStudentResponse struct {
+	ID         int            `db:"id" json:"id"`
+	Code       string         `db:"code" json:"code"`
+	Firstname  string         `db:"firstname" json:"firstname"`
+	Lastname   string         `db:"lastname" json:"lastname"`
+	Phone      *string        `db:"phone" json:"phone"`
+	Image      *string        `db:"image" json:"image"`
+	Type       model.UserType `db:"type" json:"type"`
+	Email      *string        `db:"email" json:"email"`
+	SchoolID   *int           `db:"school_id" json:"school_id"`
+	SchoolName *string        `db:"school_name" json:"school_name"`
+	ClassID    *int           `db:"class_id" json:"class_id"`
+	ClassName  *string        `db:"class_name" json:"class_name"`
+}
+
+type UserRelationsResponse struct {
+	ID        int            `db:"id" json:"id"`
+	Code      string         `db:"code" json:"code"`
+	Firstname string         `db:"firstname" json:"firstname"`
+	Lastname  string         `db:"lastname" json:"lastname"`
+	Phone     *string        `db:"phone" json:"phone"`
+	Image     *string        `db:"image" json:"image"`
+	Type      model.UserType `db:"type" json:"type"`
+	Email     *string        `db:"email" json:"email"`
+	ClassID   *int           `db:"class_id" json:"class_id"`
+}
+
+type AccountVerificationLog struct {
+	ID         int
+	UserID     int
+	Channel    string
+	Code       string
+	CodeExpiry time.Time
+	Token      sql.NullString
+	Type       sql.NullString
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }

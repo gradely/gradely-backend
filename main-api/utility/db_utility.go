@@ -5,54 +5,25 @@ import (
 	"fmt"
 	"github.com/gradely/gradely-backend/model"
 	"github.com/gradely/gradely-backend/pkg/database"
-	"github.com/gradely/gradely-backend/pkg/middleware"
-	"github.com/gradely/gradely-backend/service/auth"
 	"github.com/jmoiron/sqlx"
 	"log"
-	"strconv"
 )
-
-type Controller struct {
-	Db *sqlx.DB
-}
-
-func Identity() *model.User {
-	db := database.GetSqlxDb()
-	userModel, err := auth.GetUserByID(db, strconv.Itoa(middleware.MyIdentity.ID))
-	if err != nil {
-		log.Println(err)
-		middleware.LogErrorSentry(err)
-		panic("Not validated")
-	}
-	return userModel
-
-}
 
 func CheckExist(db *sqlx.DB, query string, args ...interface{}) bool {
 	var exists bool
 	query = fmt.Sprintf("SELECT exists (%s)", query)
 	err := db.QueryRow(query, args...).Scan(&exists)
 	if err != nil && err != sql.ErrNoRows {
-		middleware.LogErrorSentry(err)
+		LogErrorSentry(err)
 		log.Fatalf("error checking if row exists '%s' %v", args, err)
 	}
 	return exists
 }
 
-func MySchoolObject(args ...int) model.School {
-	var userId, fullStatus int
-
-	if args == nil {
-		userId = middleware.MyIdentity.ID
-		fullStatus = 0
-	} else {
-		fullStatus = args[1]
-		userId = args[0]
-	}
-
+func MySchoolObject(userId, completeSchoolObject int) model.School {
 	db := database.GetSqlxDb()
 	fullQuery := `schools.id, schools.user_id, name, slug, logo, basic_subscription, premium_subscription, subscription_expiry, state, country`
-	if fullStatus == 1 {
+	if completeSchoolObject == 1 {
 		fullQuery = `schools.*`
 	}
 
@@ -66,8 +37,7 @@ func MySchoolObject(args ...int) model.School {
 	err := db.QueryRowx(query, userId, userId).StructScan(&school)
 
 	if err != nil {
-		middleware.LogErrorSentry(err)
-		//log.Fatalf("error checking if row exists  %v", err)
+		LogErrorSentry(err)
 		return model.School{}
 	}
 	return school
@@ -86,7 +56,7 @@ func SchoolStudentSubscriptionDetails(school model.School) interface{} {
 	err := db.QueryRowx(query, school.ID).Scan(&basicCount, &premiumCount)
 
 	if err != nil {
-		middleware.LogErrorSentry(err)
+		LogErrorSentry(err)
 		log.Fatalf("error checking if row exists  %v", err)
 	}
 

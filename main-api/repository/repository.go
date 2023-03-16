@@ -5,11 +5,13 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type UtilityRepository interface {
+type GeneralRepository interface {
 	GetSchoolAdmin(db *sqlx.DB, adminID int) model.SchoolAdmin
 	GetTerm() model.TermWeek
+	GenerateLetters(n int) string
+	ValidateNumber(number string) (string, error)
 }
 
 type Repository struct {
-	Utility UtilityRepository
+	Utility GeneralRepository
 }

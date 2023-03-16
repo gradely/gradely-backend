@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/gradely/gradely-backend/pkg/middleware"
+	"github.com/gradely/gradely-backend/utility"
 	"github.com/jmoiron/sqlx"
 	"net/http"
 )
@@ -21,7 +22,7 @@ func Setup(db *sqlx.DB, validate *validator.Validate) *gin.Engine {
 	r.Use(gzip.Gzip(gzip.DefaultCompression)) // Gzip compresses responses.
 	r.Use(middleware.Security())              // Adds additional security headers.
 	r.Use(middleware.MyLimit())               // Limits the number of incoming requests.
-	middleware.InitSentryLogger()             // Initializes a Sentry logger.
+	utility.InitSentryLogger()                // Initializes a Sentry logger.
 
 	// Define the API version.
 	apiVersion := "v1"
